@@ -27,6 +27,7 @@
 
         <activity
             android:name=".AndroidLauncher"
+            android:screenOrientation="landscape"
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

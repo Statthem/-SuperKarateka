@@ -32,7 +32,7 @@ public class HUD {
         table.top();
         table.setFillParent(true);
 
-        fighTiimerLabel = new Label("TIME:" + String.format("%03d", fightTimer), new Label.LabelStyle(new BitmapFont(), Color.WHITE));
+        fighTiimerLabel = new Label("TIME:" + String.format("%02d", fightTimer), new Label.LabelStyle(new BitmapFont(), Color.WHITE));
         scoreLabel =  new Label(String.format("%06d", score), new Label.LabelStyle(new BitmapFont(), Color.WHITE));
         player1Label = new Label("Player 1",new Label.LabelStyle(new BitmapFont(), Color.WHITE));
         player2Label = new Label("Player 2",new Label.LabelStyle(new BitmapFont(), Color.WHITE));

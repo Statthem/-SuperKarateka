@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.2" tiledversion="1.2.1" orientation="orthogonal" renderorder="right-down" width="192" height="108" tilewidth="10" tileheight="10" infinite="0" nextlayerid="3" nextobjectid="9">
+ <tileset firstgid="1" source="Background.tsx"/>
+ <layer id="1" name="Background" width="192" height="108">
+  <data encoding="base64" compression="zlib">
+   eJztzjEBAAAMw6DOv+nJyAMK2AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACgd3UAQg9HDwAC
+  </data>
+ </layer>
+ <objectgroup id="2" name="ground">
+  <object id="7" x="0" y="972" width="1922" height="60"/>
+ </objectgroup>
+</map>
