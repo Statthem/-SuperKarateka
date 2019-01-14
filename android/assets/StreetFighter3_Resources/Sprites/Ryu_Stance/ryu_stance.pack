@@ -1,0 +1,13 @@
+
+ryu_stance.png
+size: 1024,128
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+sprite_sheet
+  rotate: false
+  xy: 2, 2
+  size: 780, 111
+  orig: 780, 111
+  offset: 0, 0
+  index: -1

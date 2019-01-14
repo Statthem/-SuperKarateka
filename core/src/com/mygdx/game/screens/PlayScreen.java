@@ -1,61 +1,59 @@
 package com.mygdx.game.screens;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FillViewport;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.StreetFighter;
 import com.mygdx.game.scenes.HUD;
 import com.mygdx.game.sprites.Player;
+import com.mygdx.game.creators.WorldCreator;
+
+import static com.mygdx.game.creators.WorldCreator.mapRenderer;
+import static com.mygdx.game.creators.WorldCreator.b2dr;
+import static com.mygdx.game.creators.WorldCreator.world;
+import static com.mygdx.game.creators.WorldCreator.map;
 
 public class PlayScreen implements Screen {
 
     private StreetFighter game;
-    Texture texture;
+    //Texture texture;
     private OrthographicCamera camera;
+
+    //Viewport variables
     private Viewport viewport;
     private Viewport fitViewport;
     private Viewport fillViewport;
     private Viewport screenViewport;
     private Viewport extendViewport;
+
+    Player player;
+
     private HUD hud;
 
-    private TmxMapLoader mapLoader;
-    private TiledMap map;
-    private OrthogonalTiledMapRenderer renderer;
-
-    //Box2D variables
-    private World world;
-    private Box2DDebugRenderer b2dr;
-
-    private Player player;
-
+    private TextureAtlas atlas;
 
     public PlayScreen(StreetFighter game){
+        atlas = new TextureAtlas("StreetFighter3_Resources/Sprites/Ryu_Stance/ryu_stance.pack");
+
         this.game = game;
-        texture = new Texture("frame_00_delay-0.06s.gif");
+
+        //stf3 Ryu texture
+        //texture = new Texture("frame_00_delay-0.06s.gif");
 
         //create camera
         camera = new OrthographicCamera();
@@ -72,34 +70,13 @@ public class PlayScreen implements Screen {
 
        // extendViewport.apply();
 
+        World world = null;
+        WorldCreator streetFighterWorldCreator = new WorldCreator(world);
+        streetFighterWorldCreator.createWorld();
+
+        player = new Player(WorldCreator.world, this);
+
         hud = new HUD(game.batch);
-
-        mapLoader = new TmxMapLoader();
-        map = mapLoader.load("StreetFighter3_Resources/192-108(Orthogonal).tmx");
-        renderer = new OrthogonalTiledMapRenderer(map, 1/StreetFighter.PPM);
-
-        world = new World(new Vector2(0,-10), true);
-        b2dr = new Box2DDebugRenderer();
-
-        player = new Player(world);
-
-        BodyDef bdef = new BodyDef();
-        PolygonShape shape = new PolygonShape();
-        FixtureDef fdef = new FixtureDef();
-        Body body;
-
-        for(MapObject object : map.getLayers().get(1).getObjects().getByType(RectangleMapObject.class)){
-            Rectangle rect = ((RectangleMapObject) object).getRectangle();
-
-            bdef.type = BodyDef.BodyType.StaticBody;
-            bdef.position.set((rect.getX() + rect.getWidth()/2)/StreetFighter.PPM, (rect.getY() + rect.getHeight()/2)/StreetFighter.PPM);
-
-            body = world.createBody(bdef);
-
-            shape.setAsBox((rect.getWidth()/2)/StreetFighter.PPM, (rect.getHeight()/2)/StreetFighter.PPM);
-            fdef.shape = shape;
-            body.createFixture(fdef);
-        }
 
     }
 
@@ -134,12 +111,24 @@ public class PlayScreen implements Screen {
 //        }
     }
 
+    /*
+     * shows frame-rate deviation
+     * 1 - fps == 60, > 1 - fps is lower than 60, < 1 fps is higher than 60
+     */
+    private void printFrameRateDeviation(float delta) {
+        System.out.printf("FrameRateDeviation: " + "%.2f" + "\n", delta * 60);
+    }
+
+    private void printResolution(int width, int height){
+        System.out.println("Resolution: " + width + " " + height);
+    }
+
     public void update(float dt){
      handleInput(dt);
 
      world.step(1/60f,6,2);
 
-    // System.out.println(Gdx.graphics.getDeltaTime());
+     player.update(dt);
 
         //set camera to follow player
         //camera.position.x = player.b2body.getPosition().x;
@@ -148,8 +137,9 @@ public class PlayScreen implements Screen {
      camera.update();
 
      //tell our renderer to draw only what our camera can see
-     renderer.setView(camera);
+     mapRenderer.setView(camera);
     }
+
 
     @Override
     public void show() {
@@ -158,27 +148,34 @@ public class PlayScreen implements Screen {
 
     @Override
     public void render(float delta) {
+
+       // printFrameRateDeviation(Gdx.graphics.getDeltaTime());
         update(delta);
 
-
+        //clear the game screen with black
       Gdx.gl.glClearColor(0,0,0,1);
       Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
       //render(draw tiled map)
-      renderer.render();
+      mapRenderer.render();
 
       //render Box2dDebugLines
       b2dr.render(world, camera.combined);
 
-      game.batch.setProjectionMatrix(hud.stage.getCamera().combined);
+      game.batch.setProjectionMatrix(camera.combined);
+
+
+      /*
+        game.batch.begin();
+        player.draw(game.batch);
+        game.batch.end();
+
+      */
 
       //draw our game Hud
         //hud.stage.draw();
 
 
-        game.batch.begin();
-        game.batch.draw(texture, 20,80);
-        game.batch.end();
       /*
       game.batch.setProjectionMatrix(camera.combined);
       game.batch.begin();
@@ -189,9 +186,9 @@ public class PlayScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-
         viewport.update(width, height);
-        System.out.println(width + " " + height);
+
+        printResolution(width, height);
     }
 
     @Override
@@ -211,6 +208,14 @@ public class PlayScreen implements Screen {
 
     @Override
     public void dispose() {
+          map.dispose();
+          mapRenderer.dispose();
+          world.dispose();
+          b2dr.dispose();
+          hud.dispose();
+    }
 
+    public TextureAtlas getAtlas(){
+        return atlas;
     }
 }
