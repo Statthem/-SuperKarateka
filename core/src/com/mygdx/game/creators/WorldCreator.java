@@ -16,6 +16,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.game.StreetFighter;
 
 public class WorldCreator {
+    //Map related variables
     protected static TmxMapLoader mapLoader;
     public static TiledMap map;
     public static OrthogonalTiledMapRenderer mapRenderer;
@@ -26,22 +27,16 @@ public class WorldCreator {
 
     private static final int worldGravity = -10; // -10 - default
 
-
-
-    private WorldCreator(){}
-
-    public WorldCreator(World world){
-        this.world = world;
+    public WorldCreator(){
+        world = new World(new Vector2(0,worldGravity), true);
     }
 
     public static void createWorld(){
+        b2dr = new Box2DDebugRenderer();
+
         mapLoader = new TmxMapLoader();
         map = mapLoader.load("StreetFighter3_Resources/96-54(Orthogonal).tmx");
         mapRenderer = new OrthogonalTiledMapRenderer(map, 1/StreetFighter.PPM);
-
-        world = new World(new Vector2(0,worldGravity), true);
-        b2dr = new Box2DDebugRenderer();
-
 
         //Create ground
         BodyDef bdef = new BodyDef();
@@ -49,13 +44,13 @@ public class WorldCreator {
         FixtureDef fdef = new FixtureDef();
         Body body;
 
-        for(MapObject object : WorldCreator.map.getLayers().get(1).getObjects().getByType(RectangleMapObject.class)){
+        for(MapObject object : map.getLayers().get(1).getObjects().getByType(RectangleMapObject.class)){
             Rectangle rect = ((RectangleMapObject) object).getRectangle();
 
             bdef.type = BodyDef.BodyType.StaticBody;
             bdef.position.set((rect.getX() + rect.getWidth()/2)/StreetFighter.PPM, (rect.getY() + rect.getHeight()/2)/StreetFighter.PPM);
 
-            body = WorldCreator.world.createBody(bdef);
+            body = world.createBody(bdef);
 
             shape.setAsBox((rect.getWidth()/2)/StreetFighter.PPM, (rect.getHeight()/2)/StreetFighter.PPM);
             fdef.shape = shape;

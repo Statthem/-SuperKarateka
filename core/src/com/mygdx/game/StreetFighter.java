@@ -12,7 +12,6 @@ public class StreetFighter extends Game {
     public static final int svischuk_resolution_width = 1480;
     public static final int svischuk_resolution_height = 720;
 
-
     public SpriteBatch batch;
 
     @Override
