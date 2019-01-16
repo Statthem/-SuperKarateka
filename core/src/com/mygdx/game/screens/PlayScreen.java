@@ -5,24 +5,17 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
-import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.StreetFighter;
 import com.mygdx.game.scenes.HUD;
 import com.mygdx.game.sprites.Player;
 import com.mygdx.game.creators.WorldCreator;
+import com.mygdx.game.sprites.Ryu;
 
 import static com.mygdx.game.creators.WorldCreator.mapRenderer;
 import static com.mygdx.game.creators.WorldCreator.b2dr;
@@ -42,6 +35,7 @@ public class PlayScreen implements Screen {
     private Viewport extendViewport;
 
     Player player;
+
 
     private HUD hud;
 
@@ -67,10 +61,11 @@ public class PlayScreen implements Screen {
 
         WorldCreator streetFighterWorldCreator = new WorldCreator();
         streetFighterWorldCreator.createWorld();
-
         atlas = new TextureAtlas("StreetFighter3_Resources/Sprites/Ryu_Stance/ryu_stance.pack");
 
-        player = new Player(this);
+        //player = new Player(this, true);
+        player = new Ryu(this, true);
+       // Player player2 = new Ryu(this,false);
 
         hud = new HUD(game.batch);
 
@@ -80,52 +75,49 @@ public class PlayScreen implements Screen {
 
     public void createAndroidControls(){
         wleftBounds = new Rectangle(0,0, 1000/100,1080/100);
-        wrightBounds = new Rectangle(960/100, 540/100, 1920/100, 1080/100);
+        wrightBounds = new Rectangle(1000/100, 540/100, 1920/100, 1080/100);
 
         touchPoint = new Vector3();
     }
 
     public void handleInput(float dt){
         if(Gdx.input.isKeyPressed(Input.Keys.UP)){
-            player.player1_body.applyLinearImpulse(new Vector2(0,0.5f), player.player1_body.getWorldCenter(), true);
-            //camera.position.y += 20 + dt;
+            player.player_body.applyLinearImpulse(new Vector2(0,0.5f), player.player_body.getWorldCenter(), true);
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT) && player.player1_body.getLinearVelocity().x <= 2){
-            player.player1_body.applyLinearImpulse(new Vector2(0.1f,0), player.player1_body.getWorldCenter(), true);
-            //camera.position.y -= 20 + dt;
+        else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
+            player.player_body.setLinearVelocity(6f,0);
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.LEFT) && player.player1_body.getLinearVelocity().x <= 2){
-            player.player1_body.applyLinearImpulse(new Vector2(-0.1f,0), player.player1_body.getWorldCenter(), true);
-            //camera.position.y -= 20 + dt;
+        else if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
+            player.player_body.setLinearVelocity(-5f,0);
+        }
+        else if(Gdx.input.isKeyPressed(Input.Keys.DOWN) && player.player_body.getLinearVelocity().x <= 2) {
+            player.player_body.applyLinearImpulse(new Vector2(0f, 0), player.player_body.getWorldCenter(), true);
+        } else {
+            player.player_body.setLinearVelocity(0, player.player_body.getLinearVelocity().y);
         }
 
 
-        if(Gdx.input.isTouched() && player.player1_body.getLinearVelocity().x <= 2){
+// Android controls (undeveloped)
+/*
+        if(Gdx.input.isTouched() && player.player_body.getLinearVelocity().x <= 2){
 
             camera.unproject(touchPoint.set(Gdx.input.getX(0), Gdx.input.getY(0), 0));
             System.out.println(touchPoint.x + " " + touchPoint.y);
-            if (wleftBounds.contains(touchPoint.x, touchPoint.y ) && player.player1_body.getLinearVelocity().x <= 2){
+            if (wleftBounds.contains(touchPoint.x, touchPoint.y ) && player.player_body.getLinearVelocity().x <= 2){
                 System.out.println("left");
                 //Move your player to the left!
-                player.player1_body.applyLinearImpulse(new Vector2(-0.1f,0), player.player1_body.getWorldCenter(), true);
-            }else if (wrightBounds.contains(touchPoint.x, touchPoint.y) && player.player1_body.getLinearVelocity().x <= 2){
+                player.player_body.applyLinearImpulse(new Vector2(-0.1f,0), player.player_body.getWorldCenter(), true);
+            }else if (wrightBounds.contains(touchPoint.x, touchPoint.y) && player.player_body.getLinearVelocity().x <= 2){
                 System.out.println("right");
                 //Move your player to the right!
-                player.player1_body.applyLinearImpulse(new Vector2(0.1f,0), player.player1_body.getWorldCenter(), true);
+                player.player_body.applyLinearImpulse(new Vector2(0.1f,0), player.player_body.getWorldCenter(), true);
             }
         }
 
+        */
+
         }
 
-
-
-//
-//        if(Gdx.input.isKeyPressed(Input.Keys.PLUS)){
-//            camera.zoom -= 0.01;
-//        }
-//        if(Gdx.input.isKeyPressed(Input.Keys.MINUS)){
-//            camera.zoom += 0.01;
-//        }
 
 
     /*
@@ -145,7 +137,7 @@ public class PlayScreen implements Screen {
 
      world.step(1/60f,6,2);
 
-     player.update(dt);
+        player.update(dt);
 
         //set camera to follow player
         //camera.position.x = player.b2body.getPosition().x;
@@ -167,7 +159,6 @@ public class PlayScreen implements Screen {
     public void render(float delta) {
        //  printFrameRateDeviation(Gdx.graphics.getDeltaTime());
 
-
         update(delta);
 
         //clear the game screen with black
@@ -186,10 +177,8 @@ public class PlayScreen implements Screen {
         player.draw(game.batch);
         game.batch.end();
 
-
       //draw our game Hud
         //hud.stage.draw();
-
 
       /*
       game.batch.setProjectionMatrix(camera.combined);

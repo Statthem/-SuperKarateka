@@ -28,7 +28,7 @@ public class WorldCreator {
     private static final int worldGravity = -10; // -10 - default
 
     public WorldCreator(){
-        world = new World(new Vector2(0,worldGravity), true);
+        world = new World(new Vector2(0, worldGravity), true);
     }
 
     public static void createWorld(){

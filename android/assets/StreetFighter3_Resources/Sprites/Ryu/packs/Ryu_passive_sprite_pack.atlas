@@ -1,0 +1,125 @@
+
+Ryu_passive_sprite_pack.png
+size: 8192,2048
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+ryu_blocking_high_sprite_sheet
+  rotate: false
+  xy: 4484, 1248
+  size: 540, 114
+  orig: 540, 114
+  offset: 0, 0
+  index: -1
+ryu_blocking_low_sprite_sheet
+  rotate: false
+  xy: 5718, 1402
+  size: 440, 75
+  orig: 440, 75
+  offset: 0, 0
+  index: -1
+ryu_blocking_sprite_sheet
+  rotate: false
+  xy: 1724, 380
+  size: 312, 106
+  orig: 312, 106
+  offset: 0, 0
+  index: -1
+ryu_crouching_sprite_sheet
+  rotate: false
+  xy: 7104, 1713
+  size: 1056, 109
+  orig: 1056, 109
+  offset: 0, 0
+  index: -1
+ryu_hit_crouching_sprite_sheet
+  rotate: false
+  xy: 2, 138
+  size: 1232, 75
+  orig: 1232, 75
+  offset: 0, 0
+  index: -1
+ryu_hit_standing_sprite_sheet
+  rotate: false
+  xy: 2, 1710
+  size: 7100, 112
+  orig: 7100, 112
+  offset: 0, 0
+  index: -1
+ryu_jumping_left_sprite_sheet
+  rotate: false
+  xy: 2, 1204
+  size: 4480, 380
+  orig: 4480, 380
+  offset: 0, 0
+  index: -1
+ryu_jumping_right_sprite_sheet
+  rotate: false
+  xy: 2, 838
+  size: 4400, 364
+  orig: 4400, 364
+  offset: 0, 0
+  index: -1
+ryu_jumping_sprite_sheet
+  rotate: false
+  xy: 2, 215
+  size: 1720, 384
+  orig: 1720, 384
+  offset: 0, 0
+  index: -1
+ryu_lose_sprite_sheet
+  rotate: false
+  xy: 2, 601
+  size: 3009, 113
+  orig: 3009, 113
+  offset: 0, 0
+  index: -1
+ryu_slam_sprite_sheet
+  rotate: false
+  xy: 2, 716
+  size: 4450, 120
+  orig: 4450, 120
+  offset: 0, 0
+  index: -1
+ryu_standing_sprite_sheet
+  rotate: false
+  xy: 1724, 488
+  size: 780, 111
+  orig: 780, 111
+  offset: 0, 0
+  index: -1
+ryu_standing_up_sprite_sheet
+  rotate: false
+  xy: 2, 1586
+  size: 6882, 122
+  orig: 6882, 122
+  offset: 0, 0
+  index: -1
+ryu_taunt_sprite_sheet
+  rotate: false
+  xy: 4484, 1479
+  size: 2204, 105
+  orig: 2204, 105
+  offset: 0, 0
+  index: -1
+ryu_walking_left_sprite_sheet
+  rotate: false
+  xy: 3013, 601
+  size: 1232, 113
+  orig: 1232, 113
+  offset: 0, 0
+  index: -1
+ryu_walking_right_sprite_sheet
+  rotate: false
+  xy: 4484, 1364
+  size: 1232, 113
+  orig: 1232, 113
+  offset: 0, 0
+  index: -1
+ryu_win_sprite_sheet
+  rotate: false
+  xy: 2, 2
+  size: 474, 134
+  orig: 474, 134
+  offset: 0, 0
+  index: -1
