@@ -1,5 +1,7 @@
 package com.mygdx.game.sprites;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -27,7 +29,7 @@ public abstract class Player extends Sprite {
 
     protected Array<Animation> playerAnimations;
     protected Map<String, MyTextureRegion> textureRegionMap;
-    protected TextureAtlas atlas;
+    public TextureAtlas atlas;
 
     protected MyTextureRegion currentTextureRegion;
 
@@ -40,9 +42,10 @@ public abstract class Player extends Sprite {
     private float stateTimer;
 
     private boolean isPlayer1;
+    public boolean crouching;
 
-    private float lastStateScaleX;
-    private float lastStateScaleY;
+    private float widthScalingFactor = 4.5f;
+    private float heightScalingFactor = 5.6f;
 
     private static final int ryuSprite_width = 78;
     private static final int ryuSprite_height = 111;
@@ -63,9 +66,6 @@ public abstract class Player extends Sprite {
 
     private World world;
     public Body player_body;
-    private TextureRegion playerStand;
-
-
 
     public Player(PlayScreen screen, boolean isPlayer1){
         //super(screen.getAtlas().findRegion("ryu_standing_sprite_sheet"));
@@ -73,9 +73,20 @@ public abstract class Player extends Sprite {
         this.world = WorldCreator.world;
 
         this.isPlayer1 = isPlayer1;
+        crouching = false;
 
         String simpleClassName = this.getClass().getSimpleName();
-        atlas = new TextureAtlas("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_passive_sprite_pack.atlas");
+        //atlas = new TextureAtlas("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_passive_sprite_pack.atlas");
+
+
+        screen.manager.load("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_basic_pack.atlas", TextureAtlas.class);
+
+        screen.manager.finishLoading();
+        System.out.println(screen.manager.isLoaded("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_basic_pack.atlas"));
+
+
+        if(screen.manager.isLoaded("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_basic_pack.atlas"))
+        atlas = screen.manager.get("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_basic_pack.atlas");
 
         textureRegionMap = new HashMap<>();
         populateTextureRegionMap();
@@ -87,21 +98,15 @@ public abstract class Player extends Sprite {
         currentTextureRegion = textureRegionMap.get("standing");
 
         standingAnimation = getAnimation("standing");
-        jumpingAnimation = getAnimation("jumping");
+        //jumpingAnimation = getAnimation("jumping");
         movingRightAnimation = getAnimation("movingRight");
         movingLeftAnimation = getAnimation("movingLeft");
         crouchingAnimation = getAnimation("crouching");
 
-
         createPlayer();
     }
 
-
-
-
-
     protected abstract void populateTextureRegionMap();
-
 
     protected void createPlayer(){
         BodyDef bodyDef = new BodyDef();
@@ -149,8 +154,9 @@ public abstract class Player extends Sprite {
                 0);
         head_fixtureDef.shape = head_shape;
         player_body.createFixture(head_fixtureDef);
-    }
 
+        player_body.setUserData("standing");
+    }
 
     public Animation getAnimation(String key){
         TextureRegion textureRegion = textureRegionMap.get(key);
@@ -176,17 +182,16 @@ public abstract class Player extends Sprite {
 
     public void update(float delta){
         //set sprite position on box
-        
-        setRegion(getFrame(delta));                                                                                                                                               //scaling                                                                                //scaling
-        setBounds((player_body.getPosition().x - getWidth() / 2), (player_body.getPosition().y - getHeight()/2) + 2.1f,(((MyTextureRegion) currentTextureRegion).getWidth() * 4.5f)/StreetFighter.PPM, (((MyTextureRegion) currentTextureRegion).getHeight() * 5.6f)/StreetFighter.PPM);
+        setRegion(getFrame(delta));
+        setBounds((player_body.getPosition().x - getWidth() / 2), (player_body.getPosition().y - getHeight()/2) + 2.1f,
+                (((MyTextureRegion) currentTextureRegion).getWidth() * widthScalingFactor)/StreetFighter.PPM,     //scaling
+                (((MyTextureRegion) currentTextureRegion).getHeight() * heightScalingFactor)/StreetFighter.PPM); //scaling
         //if  current animation width and height is different from previous animation - we need to setPosition after setBounds (like setting position before and after scaling )
         setPosition(player_body.getPosition().x - getWidth() / 2, (player_body.getPosition().y - getHeight()/2) + 2.1f); //without setPosition() animation lagging
     }
 
     public TextureRegion getFrame(float delta){
         currentState = getState();
-
-        stateTimer = currentState == previousState ? stateTimer + delta : 0;
 
         TextureRegion region;
         switch (currentState){
@@ -204,7 +209,7 @@ public abstract class Player extends Sprite {
                 break;
             case CROUCHING:
                 currentTextureRegion = textureRegionMap.get("crouching");
-               region = (TextureRegion) crouchingAnimation.getKeyFrame(stateTimer, false);
+                region = (TextureRegion) crouchingAnimation.getKeyFrame(stateTimer, false);
                 break;
 
                 default :
@@ -214,6 +219,7 @@ public abstract class Player extends Sprite {
         }
          // rotate sprite on x
         //region.flip(true,false);
+        stateTimer = currentState == previousState ? stateTimer + delta : 0;
         previousState = currentState;
 
         return region;
@@ -224,12 +230,13 @@ public abstract class Player extends Sprite {
             return State.JUMPING;
        else if(player_body.getLinearVelocity().y < 0)
             return State.FALLING;
+        else if(crouching == true)
+            return State.CROUCHING;
         else if(player_body.getLinearVelocity().x > 0)
             return State.MOVING_RIGHT;
         else if(player_body.getLinearVelocity().x < 0)
             return State.MOVING_LEFT;
         else return State.STANDING;
-
     }
 
 }

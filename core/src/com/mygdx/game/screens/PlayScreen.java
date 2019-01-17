@@ -3,15 +3,22 @@ package com.mygdx.game.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.StreetFighter;
+import com.mygdx.game.controls.AnalogStick;
 import com.mygdx.game.scenes.HUD;
 import com.mygdx.game.sprites.Player;
 import com.mygdx.game.creators.WorldCreator;
@@ -31,13 +38,11 @@ public class PlayScreen implements Screen {
     private Viewport viewport;
     private Viewport fitViewport;
     private Viewport fillViewport;
-    private Viewport screenViewport;
-    private Viewport extendViewport;
 
     Player player;
 
-
     private HUD hud;
+    AnalogStick stick;
 
     private TextureAtlas atlas;
 
@@ -45,6 +50,8 @@ public class PlayScreen implements Screen {
     Rectangle wleftBounds;
     Rectangle wrightBounds;
     Vector3 touchPoint;
+
+    public AssetManager manager;
 
     public PlayScreen(StreetFighter game){
         this.game = game;
@@ -61,15 +68,17 @@ public class PlayScreen implements Screen {
 
         WorldCreator streetFighterWorldCreator = new WorldCreator();
         streetFighterWorldCreator.createWorld();
-        atlas = new TextureAtlas("StreetFighter3_Resources/Sprites/Ryu_Stance/ryu_stance.pack");
 
-        //player = new Player(this, true);
+        manager = new AssetManager();
+
         player = new Ryu(this, true);
-       // Player player2 = new Ryu(this,false);
 
         hud = new HUD(game.batch);
 
+        stick = new AnalogStick(game.batch);
+
         createAndroidControls();
+
     }
 
 
@@ -83,6 +92,7 @@ public class PlayScreen implements Screen {
     public void handleInput(float dt){
         if(Gdx.input.isKeyPressed(Input.Keys.UP)){
             player.player_body.applyLinearImpulse(new Vector2(0,0.5f), player.player_body.getWorldCenter(), true);
+            player.crouching = false;
         }
         else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
             player.player_body.setLinearVelocity(6f,0);
@@ -90,31 +100,32 @@ public class PlayScreen implements Screen {
         else if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
             player.player_body.setLinearVelocity(-5f,0);
         }
-        else if(Gdx.input.isKeyPressed(Input.Keys.DOWN) && player.player_body.getLinearVelocity().x <= 2) {
-            player.player_body.applyLinearImpulse(new Vector2(0f, 0), player.player_body.getWorldCenter(), true);
+        else if(Gdx.input.isKeyPressed(Input.Keys.DOWN) ) {
+           player.crouching = true;
         } else {
+            //stop any movement
             player.player_body.setLinearVelocity(0, player.player_body.getLinearVelocity().y);
         }
 
 
-// Android controls (undeveloped)
-/*
+// Android controls (undeveloped
+
         if(Gdx.input.isTouched() && player.player_body.getLinearVelocity().x <= 2){
 
             camera.unproject(touchPoint.set(Gdx.input.getX(0), Gdx.input.getY(0), 0));
-            System.out.println(touchPoint.x + " " + touchPoint.y);
+
             if (wleftBounds.contains(touchPoint.x, touchPoint.y ) && player.player_body.getLinearVelocity().x <= 2){
-                System.out.println("left");
+
                 //Move your player to the left!
-                player.player_body.applyLinearImpulse(new Vector2(-0.1f,0), player.player_body.getWorldCenter(), true);
+                player.player_body.setLinearVelocity(-5f,0);
             }else if (wrightBounds.contains(touchPoint.x, touchPoint.y) && player.player_body.getLinearVelocity().x <= 2){
-                System.out.println("right");
+
                 //Move your player to the right!
-                player.player_body.applyLinearImpulse(new Vector2(0.1f,0), player.player_body.getWorldCenter(), true);
+                player.player_body.setLinearVelocity(6f,0);
             }
         }
 
-        */
+
 
         }
 
@@ -138,9 +149,6 @@ public class PlayScreen implements Screen {
      world.step(1/60f,6,2);
 
         player.update(dt);
-
-        //set camera to follow player
-        //camera.position.x = player.b2body.getPosition().x;
 
      //update our camera with correct coordinates after changes
      camera.update();
@@ -173,12 +181,17 @@ public class PlayScreen implements Screen {
 
       game.batch.setProjectionMatrix(camera.combined);
 
-        game.batch.begin();
-        player.draw(game.batch);
-        game.batch.end();
+            game.batch.begin();
+            player.draw(game.batch);
+            game.batch.end();
+
 
       //draw our game Hud
         //hud.stage.draw();
+
+        Gdx.input.setInputProcessor(stick.stage);
+        stick.stage.act();
+        stick.stage.draw();
 
       /*
       game.batch.setProjectionMatrix(camera.combined);
@@ -186,6 +199,7 @@ public class PlayScreen implements Screen {
       game.batch.draw(texture, 0,0);
       game.batch.end();
       */
+
     }
 
     @Override
@@ -217,6 +231,8 @@ public class PlayScreen implements Screen {
           world.dispose();
           b2dr.dispose();
           hud.dispose();
+          stick.stage.dispose();
+          player.atlas.dispose();
     }
 
     public TextureAtlas getAtlas(){

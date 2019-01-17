@@ -33,7 +33,7 @@ public class Ryu extends Player {
         textureRegionMap.put("crouching", new MyTextureRegion(atlas.findRegion("ryu_crouching_sprite_sheet"),88,109,12));
         textureRegionMap.put("movingRight", new MyTextureRegion(atlas.findRegion("ryu_walking_right_sprite_sheet"),112,113,11));
         textureRegionMap.put("movingLeft", new MyTextureRegion(atlas.findRegion("ryu_walking_left_sprite_sheet"),112,113,11));
-        textureRegionMap.put("jumping", new MyTextureRegion(atlas.findRegion("ryu_jumping_sprite_sheet"),86,192,34));
+     //   textureRegionMap.put("jumping", new MyTextureRegion(atlas.findRegion("ryu_jumping_sprite_sheet"),86,192,34));
     }
 
     @Override
