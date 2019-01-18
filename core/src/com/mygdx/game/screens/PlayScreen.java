@@ -75,24 +75,13 @@ public class PlayScreen implements Screen {
 
         stick = new AnalogStick(game.batch);
 
-        createAndroidControls();
-
     }
-
-
-    public void createAndroidControls(){
-        wleftBounds = new Rectangle(0,0, 1000/100,1080/100);
-        wrightBounds = new Rectangle(1000/100, 540/100, 1920/100, 1080/100);
-
-        touchPoint = new Vector3();
-    }
-
     public void handleInput(float dt) {
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
             player.player_body.applyLinearImpulse(new Vector2(0, 0.5f), player.player_body.getWorldCenter(), true);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && player.crouching == false) {
             player.player_body.setLinearVelocity(6f, 0);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+        } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT) && player.crouching == false) {
             player.player_body.setLinearVelocity(-5f, 0);
         } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
             player.crouching = true;
@@ -103,19 +92,7 @@ public class PlayScreen implements Screen {
         }
 
 
-// Android controls (undeveloped
 
-/*
-        float dx = stick.getKnobPercentX();
-        float dy = stick.getKnobPercentY();
-
-        System.out.println(dx  + " " + dy);
-
-        if(dx > 0)  player.player_body.setLinearVelocity(6f,0);
-        if(dx < 0)  player.player_body.setLinearVelocity(-5f,0);
-
-
-*/
         //   Try this, took me like one hour to figure it out, so I hope it works for you!
 
 // 4 inputs
@@ -144,15 +121,18 @@ public class PlayScreen implements Screen {
         if (direction == -1.0) {
             player.crouching = true;
         }
-        if (direction == -2.0 || direction == 2.0) {
+        if ((direction == -2.0 || direction == 2.0) && player.crouching == false) {
             player.player_body.setLinearVelocity(-5f, 0);
         }
         if (direction == 1.0) {
-            player.crouching = false;
         }
-        if (Gdx.input.isTouched() && direction == 0.0) {
+        if ((stick.isTouched() & direction == 0.0 & stick.getKnobPercentX() != 0) && player.crouching == false) {
             player.player_body.setLinearVelocity(6f, 0);
+        }   if(!stick.isTouched()){
+            player.crouching = false;
+            player.player_body.setLinearVelocity(0, player.player_body.getLinearVelocity().y);
         }
+
 
     }
 
@@ -233,7 +213,7 @@ public class PlayScreen implements Screen {
     public void resize(int width, int height) {
         viewport.update(width, height);
 
-        //printResolution(width, height);
+        printResolution(width, height);
     }
 
     @Override

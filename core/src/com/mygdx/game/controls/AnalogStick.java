@@ -19,8 +19,8 @@ public class AnalogStick extends Touchpad {
     private Viewport viewport;
 
     public AnalogStick(Batch batch) {
-        super(10, getTouchpadStyle());
-        setBounds(250f, 200f, 200f, 200f);
+        super(50, getTouchpadStyle());
+        setBounds(250f, 200f, 300f, 300f);
        // setPosition(x,y);
 
         viewport = new StretchViewport(1920, 1080);
