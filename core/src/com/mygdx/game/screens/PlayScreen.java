@@ -44,8 +44,6 @@ public class PlayScreen implements Screen {
     private HUD hud;
     AnalogStick stick;
 
-    private TextureAtlas atlas;
-
 //AndroidControls
     Rectangle wleftBounds;
     Rectangle wrightBounds;
@@ -89,45 +87,74 @@ public class PlayScreen implements Screen {
         touchPoint = new Vector3();
     }
 
-    public void handleInput(float dt){
-        if(Gdx.input.isKeyPressed(Input.Keys.UP)){
-            player.player_body.applyLinearImpulse(new Vector2(0,0.5f), player.player_body.getWorldCenter(), true);
-            player.crouching = false;
-        }
-        else if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
-            player.player_body.setLinearVelocity(6f,0);
-        }
-        else if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
-            player.player_body.setLinearVelocity(-5f,0);
-        }
-        else if(Gdx.input.isKeyPressed(Input.Keys.DOWN) ) {
-           player.crouching = true;
+    public void handleInput(float dt) {
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+            player.player_body.applyLinearImpulse(new Vector2(0, 0.5f), player.player_body.getWorldCenter(), true);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            player.player_body.setLinearVelocity(6f, 0);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            player.player_body.setLinearVelocity(-5f, 0);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            player.crouching = true;
+            player.player_body.setLinearVelocity(0, player.player_body.getLinearVelocity().y);
         } else {
-            //stop any movement
+            player.crouching = false;
             player.player_body.setLinearVelocity(0, player.player_body.getLinearVelocity().y);
         }
 
 
 // Android controls (undeveloped
 
-        if(Gdx.input.isTouched() && player.player_body.getLinearVelocity().x <= 2){
+/*
+        float dx = stick.getKnobPercentX();
+        float dy = stick.getKnobPercentY();
 
-            camera.unproject(touchPoint.set(Gdx.input.getX(0), Gdx.input.getY(0), 0));
+        System.out.println(dx  + " " + dy);
 
-            if (wleftBounds.contains(touchPoint.x, touchPoint.y ) && player.player_body.getLinearVelocity().x <= 2){
+        if(dx > 0)  player.player_body.setLinearVelocity(6f,0);
+        if(dx < 0)  player.player_body.setLinearVelocity(-5f,0);
 
-                //Move your player to the left!
-                player.player_body.setLinearVelocity(-5f,0);
-            }else if (wrightBounds.contains(touchPoint.x, touchPoint.y) && player.player_body.getLinearVelocity().x <= 2){
 
-                //Move your player to the right!
-                player.player_body.setLinearVelocity(6f,0);
-            }
+*/
+        //   Try this, took me like one hour to figure it out, so I hope it works for you!
+
+// 4 inputs
+// down = -1, left = -2 and 2, up = 1, right = 0;
+        float dx = stick.getKnobPercentX();
+        float dy = stick.getKnobPercentY();
+
+        double direction = Math.floor((Math.atan2(dy, dx) + Math.PI / 4) / (2 * Math.PI / 4));
+
+        if (direction >= 4) direction = 0;
+        double angle = direction * (Math.PI / 4);
+
+
+//   8 inputs
+//   down = -2 , down-left = -3, left = -4 and 4, left-up = 3, up = 2, right-up = 1, right = 0, right-down = -1
+
+//        float dx = stick.getKnobPercentX();
+//        float dy = stick.getKnobPercentY();
+//
+//        double direction =  Math.floor((Math.atan2(dy, dx) + Math.PI/8) / (2*Math.PI/8));
+
+//        if (direction >= 8) direction = 0;
+//        double angle = direction * (Math.PI/4);
+
+
+        if (direction == -1.0) {
+            player.crouching = true;
+        }
+        if (direction == -2.0 || direction == 2.0) {
+            player.player_body.setLinearVelocity(-5f, 0);
+        }
+        if (direction == 1.0) {
+            player.crouching = false;
+        }
+        if (Gdx.input.isTouched() && direction == 0.0) {
+            player.player_body.setLinearVelocity(6f, 0);
         }
 
-
-
-        }
+    }
 
 
 
@@ -233,9 +260,9 @@ public class PlayScreen implements Screen {
           hud.dispose();
           stick.stage.dispose();
           player.atlas.dispose();
+          manager.unload("StreetFighter3_Resources/Sprites/Ryu/packs/Ryu_basic_pack.atlas");
+
     }
 
-    public TextureAtlas getAtlas(){
-        return atlas;
-    }
 }
+

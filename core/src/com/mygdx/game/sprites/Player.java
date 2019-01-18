@@ -23,7 +23,7 @@ import java.util.Map;
 
 
 public abstract class Player extends Sprite {
-    public enum State {STANDING, CROUCHING, MOVING_RIGHT, MOVING_LEFT, JUMPING, FALLING, FIGHTING, HITSTUN}
+    public enum State {STANDING, CROUCHING1, CROUCHING2, CROUCHING3, MOVING_RIGHT, MOVING_LEFT, JUMPING, FALLING, FIGHTING, HITSTUN}
     public State currentState;
     public State previousState;
 
@@ -37,7 +37,10 @@ public abstract class Player extends Sprite {
     private Animation jumpingAnimation;
     private Animation movingLeftAnimation;
     private Animation movingRightAnimation;
-    private Animation crouchingAnimation;
+    private Animation crouchingAnimation1;
+    private Animation crouchingAnimation2;
+    private Animation crouchingAnimation3;
+
 
     private float stateTimer;
 
@@ -101,7 +104,10 @@ public abstract class Player extends Sprite {
         //jumpingAnimation = getAnimation("jumping");
         movingRightAnimation = getAnimation("movingRight");
         movingLeftAnimation = getAnimation("movingLeft");
-        crouchingAnimation = getAnimation("crouching");
+        crouchingAnimation1 = getAnimation("crouching", 0, 2);
+        crouchingAnimation2 = getAnimation("crouching", 3,8);
+        crouchingAnimation3 = getAnimation("crouching",9,11);
+
 
         createPlayer();
     }
@@ -113,10 +119,10 @@ public abstract class Player extends Sprite {
 
         float headTurn = 0.25f;
         if(!isPlayer1) {
-            bodyDef.position.set(15.2f, 4.7f); // x, y of body center
+            bodyDef.position.set(15.2f, 2.2f); // x, y of body center
             headTurn = -0.25f;
         } else
-        bodyDef.position.set(4.2f, 4.7f); // x, y of body center
+        bodyDef.position.set(4.2f, 2.2f); // x, y of body center
 
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         player_body = world.createBody(bodyDef);
@@ -180,6 +186,26 @@ public abstract class Player extends Sprite {
             return animation;
     }
 
+    public Animation getAnimation(String key, int from, int to){
+        TextureRegion textureRegion = textureRegionMap.get(key);
+        super.setRegion(textureRegion);
+
+        int x = getRegionX();
+        int y = getRegionY();
+
+        Array<TextureRegion> frames = new Array<>();
+        //add first frame
+        for (int i = from; i <= to; i++) {
+            if(i == 0)  frames.add(new TextureRegion(getTexture(), x + ((MyTextureRegion) textureRegion).getWidth(), y, ((MyTextureRegion) textureRegion).getWidth(), ((MyTextureRegion) textureRegion).getHeight()));
+            else
+            frames.add(new TextureRegion(getTexture(), x + i * ((MyTextureRegion) textureRegion).getWidth(), y, ((MyTextureRegion) textureRegion).getWidth(), ((MyTextureRegion) textureRegion).getHeight()));
+        }
+        Animation animation = new Animation(0.065f, frames); //0.1 default (less = faster)
+        frames.clear();
+
+        return animation;
+    }
+
     public void update(float delta){
         //set sprite position on box
         setRegion(getFrame(delta));
@@ -197,6 +223,7 @@ public abstract class Player extends Sprite {
         switch (currentState){
             case STANDING:
                 currentTextureRegion = textureRegionMap.get("standing");
+              //  System.out.println("standing");
                region = (TextureRegion) standingAnimation.getKeyFrame(stateTimer, true);
                 break;
             case MOVING_RIGHT:
@@ -207,9 +234,20 @@ public abstract class Player extends Sprite {
                 currentTextureRegion = textureRegionMap.get("movingLeft");
                region = (TextureRegion) movingLeftAnimation.getKeyFrame(stateTimer, true);
                 break;
-            case CROUCHING:
+            case CROUCHING1:
                 currentTextureRegion = textureRegionMap.get("crouching");
-                region = (TextureRegion) crouchingAnimation.getKeyFrame(stateTimer, false);
+           //     System.out.println("crouching1");
+                region = (TextureRegion) crouchingAnimation1.getKeyFrame(stateTimer, false);
+                break;
+            case CROUCHING2:
+                currentTextureRegion = textureRegionMap.get("crouching");
+          //      System.out.println("crouching2");
+                region = (TextureRegion) crouchingAnimation2.getKeyFrame(stateTimer, true);
+                break;
+            case CROUCHING3:
+                currentTextureRegion = textureRegionMap.get("crouching");
+         //       System.out.println("crouching3");
+                region = (TextureRegion) crouchingAnimation3.getKeyFrame(stateTimer, false);
                 break;
 
                 default :
@@ -225,18 +263,38 @@ public abstract class Player extends Sprite {
         return region;
     }
 
-    public State getState(){
-        if(player_body.getLinearVelocity().y > 0)
-            return State.JUMPING;
-       else if(player_body.getLinearVelocity().y < 0)
-            return State.FALLING;
-        else if(crouching == true)
-            return State.CROUCHING;
-        else if(player_body.getLinearVelocity().x > 0)
-            return State.MOVING_RIGHT;
-        else if(player_body.getLinearVelocity().x < 0)
-            return State.MOVING_LEFT;
-        else return State.STANDING;
+    public State getState() {
+
+        State state = State.STANDING;
+
+        if (player_body.getLinearVelocity().y > 0)
+              state = State.JUMPING;
+        if (player_body.getLinearVelocity().y < 0)
+            state = State.FALLING;
+        if (player_body.getLinearVelocity().x > 0)
+            state = State.MOVING_RIGHT;
+         if (player_body.getLinearVelocity().x < 0)
+            state = State.MOVING_LEFT;
+         if (crouching == true) {
+            if ((previousState == State.STANDING || previousState == State.CROUCHING1) && previousState != State.CROUCHING2) {
+                state = State.CROUCHING1;
+            }                                                                        // F-ing f-ck
+            if ((previousState == State.CROUCHING1 & state == State.CROUCHING1 & crouchingAnimation1.isAnimationFinished(stateTimer)) || previousState == State.CROUCHING2){
+                state = State.CROUCHING2;
+            }
+//        else if(previousState == State.CROUCHING2 & (crouching == false))
+//            return State.CROUCHING3;
+        }
+        if(crouching == false){
+             if((previousState == State.CROUCHING1 & crouchingAnimation1.isAnimationFinished(stateTimer)) ||  previousState == State.CROUCHING2 || previousState == State.CROUCHING3)
+              state = State.CROUCHING3;
+
+        }
+
+        if(previousState == State.CROUCHING3 & crouchingAnimation3.isAnimationFinished(stateTimer))
+            state = State.STANDING;
+
+        return state;
     }
 
 }
