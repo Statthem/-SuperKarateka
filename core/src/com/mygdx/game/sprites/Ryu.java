@@ -25,15 +25,35 @@ public class Ryu extends Player {
 
     public Ryu(PlayScreen screen, boolean isPlayer1) {
         super(screen, isPlayer1);
+
+        String simpleClassName = this.getClass().getSimpleName();
+        //atlas = new TextureAtlas("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_passive_sprite_pack.atlas");
+        screen.manager.load("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_basic_pack.atlas", TextureAtlas.class);
+        screen.manager.load("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_Jumping_pack.atlas", TextureAtlas.class);
+        screen.manager.finishLoading();
+
+        basicAtlas = screen.manager.get("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_basic_pack.atlas");
+        jumpingAtlas = screen.manager.get("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_Jumping_pack.atlas");
+
+        populateTextureRegionMap();
+
+        standingAnimation = getAnimation("standing");
+        movingRightAnimation = getAnimation("movingRight");
+        movingLeftAnimation = getAnimation("movingLeft");
+        crouchingAnimation1 = getAnimation("crouching", 0, 3, 0.025f);
+        crouchingAnimation2 = getAnimation("crouching", 4,8, 0.2f);
+        crouchingAnimation3 = getAnimation("crouching",9,11,0.025f );
+        jumpingAnimation = getJumpingAnimation("jumping", 0.02f);
+
     }
 
     @Override
     protected void populateTextureRegionMap() {
-        textureRegionMap.put("standing", new MyTextureRegion(atlas.findRegion("ryu_standing_sprite_sheet"),78,111, 10));
-        textureRegionMap.put("crouching", new MyTextureRegion(atlas.findRegion("ryu_crouching_sprite_sheet"),88,109,12));
-        textureRegionMap.put("movingRight", new MyTextureRegion(atlas.findRegion("ryu_walking_right_sprite_sheet"),112,113,11));
-        textureRegionMap.put("movingLeft", new MyTextureRegion(atlas.findRegion("ryu_walking_left_sprite_sheet"),112,113,11));
-     //   textureRegionMap.put("jumping", new MyTextureRegion(atlas.findRegion("ryu_jumping_sprite_sheet"),86,192,34));
+        textureRegionMap.put("standing", new MyTextureRegion(basicAtlas.findRegion("ryu_standing_sprite_sheet"),78,111, 10));
+        textureRegionMap.put("crouching", new MyTextureRegion(basicAtlas.findRegion("ryu_crouching_sprite_sheet"),88,109,12));
+        textureRegionMap.put("movingRight", new MyTextureRegion(basicAtlas.findRegion("ryu_walking_right_sprite_sheet"),112,113,11));
+        textureRegionMap.put("movingLeft", new MyTextureRegion(basicAtlas.findRegion("ryu_walking_left_sprite_sheet"),112,113,11));
+        textureRegionMap.put("jumping", new MyTextureRegion(jumpingAtlas.findRegion("ryu_jumping_sprite_sheet"),86,192,34));
     }
 
     @Override
@@ -45,5 +65,11 @@ public class Ryu extends Player {
     @Override
     public void update(float delta){
         super.update(delta);
+    }
+
+    @Override
+    public void dispose() {
+        screen.manager.unload("StreetFighter3_Resources/Sprites/Ryu/packs/Ryu_basic_pack.atlas");
+        screen.manager.unload("StreetFighter3_Resources/Sprites/Ryu/packs/Ryu_Jumping_pack.atlas");
     }
 }

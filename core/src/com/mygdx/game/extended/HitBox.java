@@ -1,6 +1,8 @@
 package com.mygdx.game.extended;
 
-public class HitBox {
+public class HitBox{
+
+
 
 
 

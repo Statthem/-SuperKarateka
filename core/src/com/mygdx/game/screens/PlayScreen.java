@@ -13,6 +13,10 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.utils.viewport.FillViewport;
@@ -44,10 +48,11 @@ public class PlayScreen implements Screen {
     private HUD hud;
     AnalogStick stick;
 
+    Body leftBorder;
+    Body rightBorder;
+
 //AndroidControls
-    Rectangle wleftBounds;
-    Rectangle wrightBounds;
-    Vector3 touchPoint;
+   private boolean enableAndroidControls;
 
     public AssetManager manager;
 
@@ -73,12 +78,39 @@ public class PlayScreen implements Screen {
 
         hud = new HUD(game.batch);
 
+       enableAndroidControls = true;
         stick = new AnalogStick(game.batch);
 
+        createBorders();
     }
+
+    void createBorders(){
+        BodyDef leftBorderBody = new BodyDef();
+        leftBorderBody.position.set(0f, 5.9f); // x, y of body center
+        leftBorderBody.type = BodyDef.BodyType.StaticBody;
+        leftBorder = WorldCreator.world.createBody(leftBorderBody);
+
+        BodyDef rightBorderBody = new BodyDef();
+        rightBorderBody.position.set(19.18f, 5.88f); // x, y of body center
+        rightBorderBody.type = BodyDef.BodyType.StaticBody;
+        rightBorder = WorldCreator.world.createBody(rightBorderBody);
+
+        FixtureDef leftBorderFixtureDef = new FixtureDef();
+        PolygonShape border_shape = new PolygonShape();
+        border_shape.setAsBox(1/StreetFighter.PPM, 5.9f/StreetFighter.PPM);
+        leftBorderFixtureDef.shape = border_shape;
+        leftBorder.createFixture(leftBorderFixtureDef);
+
+
+        FixtureDef rightBorderFixtureDef = new FixtureDef();
+        rightBorderFixtureDef.shape = border_shape;
+        rightBorder.createFixture(rightBorderFixtureDef);
+    }
+
+
     public void handleInput(float dt) {
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            player.player_body.applyLinearImpulse(new Vector2(0, 0.5f), player.player_body.getWorldCenter(), true);
+        if (Gdx.input.isKeyJustPressed(Input.Keys.UP) && player.crouching == false) {
+            player.jumping = true;
         } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && player.crouching == false) {
             player.player_body.setLinearVelocity(6f, 0);
         } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT) && player.crouching == false) {
@@ -86,51 +118,82 @@ public class PlayScreen implements Screen {
         } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
             player.crouching = true;
             player.player_body.setLinearVelocity(0, player.player_body.getLinearVelocity().y);
-        } else {
+        } else if (Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT)) {
+            System.out.println("mouse position.x " + (Gdx.input.getX()));
+            System.out.println("mouse position.y " + (1080 - Gdx.input.getY()));
+        }
+        else {
             player.crouching = false;
             player.player_body.setLinearVelocity(0, player.player_body.getLinearVelocity().y);
         }
 
 
 
-        //   Try this, took me like one hour to figure it out, so I hope it works for you!
-
-// 4 inputs
-// down = -1, left = -2 and 2, up = 1, right = 0;
-        float dx = stick.getKnobPercentX();
-        float dy = stick.getKnobPercentY();
-
-        double direction = Math.floor((Math.atan2(dy, dx) + Math.PI / 4) / (2 * Math.PI / 4));
-
-        if (direction >= 4) direction = 0;
-        double angle = direction * (Math.PI / 4);
-
+        if(enableAndroidControls) {
 
 //   8 inputs
 //   down = -2 , down-left = -3, left = -4 and 4, left-up = 3, up = 2, right-up = 1, right = 0, right-down = -1
 
-//        float dx = stick.getKnobPercentX();
-//        float dy = stick.getKnobPercentY();
-//
-//        double direction =  Math.floor((Math.atan2(dy, dx) + Math.PI/8) / (2*Math.PI/8));
+        float dx = stick.getKnobPercentX();
+        float dy = stick.getKnobPercentY();
 
-//        if (direction >= 8) direction = 0;
-//        double angle = direction * (Math.PI/4);
+        double direction =  Math.floor((Math.atan2(dy, dx) + Math.PI/8) / (2*Math.PI/8));
+
+        if (direction >= 8) direction = 0;
+        double angle = direction * (Math.PI/4);
 
 
-        if (direction == -1.0) {
-            player.crouching = true;
-        }
-        if ((direction == -2.0 || direction == 2.0) && player.crouching == false) {
-            player.player_body.setLinearVelocity(-5f, 0);
-        }
-        if (direction == 1.0) {
-        }
-        if ((stick.isTouched() & direction == 0.0 & stick.getKnobPercentX() != 0) && player.crouching == false) {
-            player.player_body.setLinearVelocity(6f, 0);
-        }   if(!stick.isTouched()){
-            player.crouching = false;
-            player.player_body.setLinearVelocity(0, player.player_body.getLinearVelocity().y);
+            if (direction == -2.0) {
+                player.crouching = true;
+            }
+            if ((direction == -3.0 || direction == 3.0 || direction == -4.0 || direction == 4.0) && player.crouching == false) {
+                player.player_body.setLinearVelocity(-5f, 0);
+            }
+            if ((stick.isTouched() & (direction == 0.0 || direction == 1 || direction == -1) & stick.getKnobPercentX() != 0) && player.crouching == false) {
+                player.player_body.setLinearVelocity(6f, 0);
+            }
+            if (direction == 2.0) {
+                player.jumping = true;
+            }
+
+            if((direction == 3.0 || direction == -4 || direction == 4) & player.jumping == true & player.crouching == false)
+                player.player_body.setLinearVelocity(-8f, 0);
+            if((direction == 1 || direction == 0) & player.jumping == true & player.crouching == false)
+                player.player_body.setLinearVelocity(8f, 0);
+
+            if (!stick.isTouched()) {
+                player.crouching = false;
+                player.player_body.setLinearVelocity(0, player.player_body.getLinearVelocity().y);
+            }
+
+// 4 inputs
+// down = -1, left = -2 and 2, up = 1, right = 0;
+
+//            float dx = stick.getKnobPercentX();
+//            float dy = stick.getKnobPercentY();
+
+//            double direction = Math.floor((Math.atan2(dy, dx) + Math.PI / 4) / (2 * Math.PI / 4));
+
+//            if (direction >= 4) direction = 0;
+//            double angle = direction * (Math.PI / 4);
+
+//            if (direction == -1.0) {
+//                player.crouching = true;
+//            }
+//            if ((direction == -2.0 || direction == 2.0) && player.crouching == false) {
+//                player.player_body.setLinearVelocity(-5f, 0);
+//            }
+//            if (direction == 1.0) {
+//                player.jumping = true;
+//            }
+//            if ((stick.isTouched() & direction == 0.0 & stick.getKnobPercentX() != 0) && player.crouching == false) {
+//                player.player_body.setLinearVelocity(6f, 0);
+//            }
+//            if (!stick.isTouched()) {
+//                player.crouching = false;
+//                player.player_body.setLinearVelocity(0, player.player_body.getLinearVelocity().y);
+//            }
+
         }
 
 
@@ -155,7 +218,7 @@ public class PlayScreen implements Screen {
 
      world.step(1/60f,6,2);
 
-        player.update(dt);
+     player.update(dt);
 
      //update our camera with correct coordinates after changes
      camera.update();
@@ -192,21 +255,11 @@ public class PlayScreen implements Screen {
             player.draw(game.batch);
             game.batch.end();
 
-
-      //draw our game Hud
         //hud.stage.draw();
 
         Gdx.input.setInputProcessor(stick.stage);
         stick.stage.act();
         stick.stage.draw();
-
-      /*
-      game.batch.setProjectionMatrix(camera.combined);
-      game.batch.begin();
-      game.batch.draw(texture, 0,0);
-      game.batch.end();
-      */
-
     }
 
     @Override
@@ -238,10 +291,9 @@ public class PlayScreen implements Screen {
           world.dispose();
           b2dr.dispose();
           hud.dispose();
-          stick.stage.dispose();
-          player.atlas.dispose();
-          manager.unload("StreetFighter3_Resources/Sprites/Ryu/packs/Ryu_basic_pack.atlas");
-
+          stick.dispose();
+          player.dispose();
+          manager.dispose();
     }
 
 }
