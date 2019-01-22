@@ -25,7 +25,7 @@ public class WorldCreator {
     public static World world;
     public static Box2DDebugRenderer b2dr;
 
-    private static final int worldGravity = -10; // -10 - default
+    private static final int worldGravity = 0; // -10 - default
 
     public WorldCreator(){
         world = new World(new Vector2(0, worldGravity), true);

@@ -1,41 +1,18 @@
 package com.mygdx.game.sprites;
 
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.mygdx.game.StreetFighter;
 import com.mygdx.game.extended.MyTextureRegion;
 import com.mygdx.game.screens.PlayScreen;
 
 public class Ryu extends Player {
 
-    private static final int ryuSprite_width = 78;
-    private static final int ryuSprite_height = 111;
-
-
-    private static int player_lowBox_hx = 145;
-    private static int player_lowBox_hy = 90;
-
-    private static int player_midBox_hx = 95;
-    private static int player_midBox_hy = 100;
-
-    private static int player_highBox_hx = 125;
-    private static int player_highBox_hy = 55;
-
-    private static int player_headBox_hx = 38;
-    private static int player_headBox_hy = 35;
-
-
     public Ryu(PlayScreen screen, boolean isPlayer1) {
         super(screen, isPlayer1);
 
-        String simpleClassName = this.getClass().getSimpleName();
-        //atlas = new TextureAtlas("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_passive_sprite_pack.atlas");
-        screen.manager.load("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_basic_pack.atlas", TextureAtlas.class);
-        screen.manager.load("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_Jumping_pack.atlas", TextureAtlas.class);
-        screen.manager.finishLoading();
-
-        basicAtlas = screen.manager.get("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_basic_pack.atlas");
-        jumpingAtlas = screen.manager.get("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_Jumping_pack.atlas");
-
         populateTextureRegionMap();
+        setFixtures();
+        createPlayer();
 
         standingAnimation = getAnimation("standing");
         movingRightAnimation = getAnimation("movingRight");
@@ -46,6 +23,33 @@ public class Ryu extends Player {
         jumpingAnimation = getJumpingAnimation("jumping", 0.02f);
 
     }
+
+    @Override
+    protected void setFixtures() {
+        sprite_width = 78;
+        sprite_height = 111;
+
+        standing_lowBox_hx = 125;
+        standing_lowBox_hy = 80;
+        standing_midBox_hx = 90;
+        standing_midBox_hy = 85;
+        standing_highBox_hx = 105;
+        standing_highBox_hy = 55;
+        standing_headBox_hx = 33;
+        standing_headBox_hy = 28;
+
+        crouching_lowBox_hx = 125;
+        crouching_lowBox_hy = 50;
+        crouching_midBox_hx = 90;
+        crouching_midBox_hy = 40;
+        crouching_highBox_hx = 105;
+        crouching_highBox_hy = 30;
+        crouching_headBox_hx = 33;
+        crouching_headBox_hy = 28;
+
+        scaledWidht = (this.sprite_width * this.widthScalingFactor)/StreetFighter.PPM;
+    }
+
 
     @Override
     protected void populateTextureRegionMap() {

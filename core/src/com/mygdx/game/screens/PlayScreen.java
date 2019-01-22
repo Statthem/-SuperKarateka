@@ -51,6 +51,8 @@ public class PlayScreen implements Screen {
     Body leftBorder;
     Body rightBorder;
 
+    private double stickPreviousDirection;
+    private double stickCurrentDirection;
 //AndroidControls
    private boolean enableAndroidControls;
 
@@ -78,7 +80,8 @@ public class PlayScreen implements Screen {
 
         hud = new HUD(game.batch);
 
-       enableAndroidControls = true;
+        enableAndroidControls = true;
+
         stick = new AnalogStick(game.batch);
 
         createBorders();
@@ -95,12 +98,12 @@ public class PlayScreen implements Screen {
         rightBorderBody.type = BodyDef.BodyType.StaticBody;
         rightBorder = WorldCreator.world.createBody(rightBorderBody);
 
-        FixtureDef leftBorderFixtureDef = new FixtureDef();
         PolygonShape border_shape = new PolygonShape();
         border_shape.setAsBox(1/StreetFighter.PPM, 5.9f/StreetFighter.PPM);
+
+        FixtureDef leftBorderFixtureDef = new FixtureDef();
         leftBorderFixtureDef.shape = border_shape;
         leftBorder.createFixture(leftBorderFixtureDef);
-
 
         FixtureDef rightBorderFixtureDef = new FixtureDef();
         rightBorderFixtureDef.shape = border_shape;
@@ -111,6 +114,7 @@ public class PlayScreen implements Screen {
     public void handleInput(float dt) {
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP) && player.crouching == false) {
             player.jumping = true;
+            player.player_body.setLinearVelocity(0, 12);
         } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) && player.crouching == false) {
             player.player_body.setLinearVelocity(6f, 0);
         } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT) && player.crouching == false) {
@@ -143,6 +147,8 @@ public class PlayScreen implements Screen {
         double angle = direction * (Math.PI/4);
 
 
+        stickCurrentDirection = direction;
+
             if (direction == -2.0) {
                 player.crouching = true;
             }
@@ -152,8 +158,13 @@ public class PlayScreen implements Screen {
             if ((stick.isTouched() & (direction == 0.0 || direction == 1 || direction == -1) & stick.getKnobPercentX() != 0) && player.crouching == false) {
                 player.player_body.setLinearVelocity(6f, 0);
             }
-            if (direction == 2.0) {
+            if (direction == 2.0 & player.player_body.getPosition().y <= 6) {
                 player.jumping = true;
+                player.player_body.setLinearVelocity(0, 15);
+            }
+            if (direction != 2.0 & player.player_body.getPosition().y >= 6) {
+                player.jumping = false;
+                player.player_body.setLinearVelocity(0, -15);
             }
 
             if((direction == 3.0 || direction == -4 || direction == 4) & player.jumping == true & player.crouching == false)
@@ -164,6 +175,13 @@ public class PlayScreen implements Screen {
             if (!stick.isTouched()) {
                 player.crouching = false;
                 player.player_body.setLinearVelocity(0, player.player_body.getLinearVelocity().y);
+            }
+
+
+
+            stickPreviousDirection = stickCurrentDirection;
+            if (player.jumping == true){
+                System.out.println("jumping");
             }
 
 // 4 inputs
