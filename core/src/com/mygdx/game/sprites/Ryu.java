@@ -4,11 +4,12 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.mygdx.game.StreetFighter;
 import com.mygdx.game.extended.MyTextureRegion;
 import com.mygdx.game.screens.PlayScreen;
+import com.mygdx.game.world.MyWorld;
 
 public class Ryu extends Player {
 
-    public Ryu(PlayScreen screen, boolean isPlayer1) {
-        super(screen, isPlayer1);
+    public Ryu(PlayScreen screen, boolean isPlayer1, MyWorld myWorld) {
+        super(screen, isPlayer1, myWorld);
 
         populateTextureRegionMap();
         setFixtures();
