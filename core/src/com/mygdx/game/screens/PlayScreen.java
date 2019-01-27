@@ -33,6 +33,7 @@ public class PlayScreen implements Screen {
     private Viewport viewport;
 
     Player player;
+    Player player2;
 
     private HUD hud;
     AnalogStick stick;
@@ -59,6 +60,7 @@ public class PlayScreen implements Screen {
         manager = new AssetManager();
 
         player = new Ryu(this, true, myWorld);
+        player2 = new Ryu(this, false, myWorld);
 
         hud = new HUD(game.batch);
 
@@ -109,6 +111,7 @@ public class PlayScreen implements Screen {
 
         stickCurrentDirection = direction;
 
+
             if (direction == -2.0) {
                 player.crouching = true;
             }
@@ -120,7 +123,7 @@ public class PlayScreen implements Screen {
             }
 
             //jumping
-            if (direction == 2.0 & stickPreviousDirection != 2.0 & player.getCurrentState() != Player.State.JUMPING) {
+            if (direction == 2.0 & (stickPreviousDirection != 2.0 & stickPreviousDirection != 3.0 & stickPreviousDirection != 1) & player.getCurrentState() != Player.State.JUMPING) {
                 player.jumping = true;
                 player.player_body.setLinearVelocity(0, 15);
             }
@@ -128,14 +131,23 @@ public class PlayScreen implements Screen {
                player.player_body.setLinearVelocity(0, -11);
             }
 
-
             //moving while jumping
-            if((direction == 3.0 || direction == -4 || direction == 4) & player.jumping == true & player.crouching == false) {
-                player.player_body.setLinearVelocity(-8f, player.player_body.getLinearVelocity().y);
-            }
-            if((direction == 1 || direction == 0) & player.jumping == true & player.crouching == false  & player.player_body.getLinearVelocity().x >= 0)
-                player.player_body.setLinearVelocity(8f, player.player_body.getLinearVelocity().y);
+//            if((direction == 3.0 || direction == -4 || direction == 4) & player.jumping == true & player.crouching == false) {
+//                player.player_body.setLinearVelocity(-8f, player.player_body.getLinearVelocity().y);
+//            }
+//            if((direction == 1 || direction == 0) & player.jumping == true & player.crouching == false)
+//                player.player_body.setLinearVelocity(8f, player.player_body.getLinearVelocity().y);
 
+            //jumping left and right
+            if(stickPreviousDirection == 2 & stickCurrentDirection == 3) {
+                System.out.println("jumpingLeft");
+                player.setCurrentState(Player.State.JUMPINGLEFT);
+            }
+
+            if(stickPreviousDirection == 2 & stickCurrentDirection == 1) {
+                System.out.println("jumpingRight");
+                player.setCurrentState(Player.State.JUMPINGRIGHT);
+            }
 
             if (!stick.isTouched()) {
                 player.crouching = false;
@@ -200,6 +212,7 @@ public class PlayScreen implements Screen {
      world.step(1/60f,6,2);
 
      player.update(dt);
+     player2.update(dt);
 
      //update our camera with correct coordinates after changes
      camera.update();
@@ -216,10 +229,7 @@ public class PlayScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        printFrameRateDeviation(delta);
         update(delta);
-
-
 
         //clear the game screen with black
       Gdx.gl.glClearColor(0,0,0,1);
@@ -235,6 +245,7 @@ public class PlayScreen implements Screen {
 
             game.batch.begin();
             player.draw(game.batch);
+            player2.draw(game.batch);
             game.batch.end();
 
         //hud.stage.draw();

@@ -34,11 +34,11 @@ public class AnalogStick extends Touchpad implements Disposable {
         touchpadSkin.add("touchBackground", new Texture("StreetFighter3_Resources/Sprites/Controls/touchBackground.png"));
         touchpadSkin.add("touchKnob", new Texture("StreetFighter3_Resources/Sprites/Controls/touchBackground.png"));
 
-        touchpadStyle = new Touchpad.TouchpadStyle();
-
         touchBackground = touchpadSkin.getDrawable("touchBackground");
+
         touchKnob = touchpadSkin.getDrawable("touchKnob");
 
+        touchpadStyle = new Touchpad.TouchpadStyle();
         touchpadStyle.background = touchBackground;
         touchpadStyle.knob = touchKnob;
 

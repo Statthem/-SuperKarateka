@@ -21,7 +21,7 @@ import java.util.Map;
 
 
 public abstract class Player extends Sprite implements Disposable{
-    public enum State {STANDING, CROUCHING1, CROUCHING2, CROUCHING3, MOVING_RIGHT, MOVING_LEFT, JUMPING, FALLING, FIGHTING, HITSTUN}
+    public enum State {STANDING, CROUCHING1, CROUCHING2, CROUCHING3, MOVING_RIGHT, MOVING_LEFT, JUMPING, JUMPINGLEFT, JUMPINGRIGHT, FALLING, FIGHTING, HITSTUN}
     private State currentState;
     private State previousState;
 
@@ -58,10 +58,11 @@ public abstract class Player extends Sprite implements Disposable{
 
     protected Array<Animation> playerAnimations;
     protected Map<String, MyTextureRegion> textureRegionMap;
+
     public TextureAtlas basicAtlas;
     public TextureAtlas jumpingAtlas;
-
-    protected MyTextureRegion currentTextureRegion;
+    public TextureAtlas jumpingLeftAtlas;
+    public TextureAtlas jumpingRightAtlas;
 
     public Animation standingAnimation;
     public Animation movingLeftAnimation;
@@ -70,17 +71,22 @@ public abstract class Player extends Sprite implements Disposable{
     public Animation crouchingAnimation2;
     public Animation crouchingAnimation3;
     public Animation jumpingAnimation;
+    public Animation jumpingLeftAnimation;
+    public Animation jumpingRightAnimation;
 
     private float stateTimer;
 
-    private boolean isPlayer1;
     public boolean crouching;
     public boolean jumping;
+
+    private boolean isPlayer1Side;
+    private boolean isAnimationSwapped;
 
     private com.badlogic.gdx.physics.box2d.World world;
     public Body player_body;
 
     private float lastPositionY;
+    private float lastPositionX;
 
     public Player(PlayScreen screen, boolean isPlayer1, MyWorld myWorld){
         super();
@@ -92,13 +98,20 @@ public abstract class Player extends Sprite implements Disposable{
 
         screen.manager.load("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_basic_pack.atlas", TextureAtlas.class);
         screen.manager.load("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_Jumping_pack.atlas", TextureAtlas.class);
+        screen.manager.load("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_jumpingLeft.atlas", TextureAtlas.class);
+        screen.manager.load("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_jumpingRight.atlas", TextureAtlas.class);
         screen.manager.finishLoading();
 
         basicAtlas = screen.manager.get("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_basic_pack.atlas");
         jumpingAtlas = screen.manager.get("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_Jumping_pack.atlas");
+        jumpingLeftAtlas = screen.manager.get("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_jumpingLeft.atlas");
+        jumpingRightAtlas = screen.manager.get("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_jumpingRight.atlas");
 
-        this.isPlayer1 = isPlayer1;
+        isPlayer1Side = isPlayer1;
+        isAnimationSwapped = false;
+
         crouching = false;
+
         jumping = false;
 
         textureRegionMap = new HashMap<>();
@@ -109,7 +122,6 @@ public abstract class Player extends Sprite implements Disposable{
     }
 
     protected abstract void setFixtures();
-
     protected abstract void populateTextureRegionMap();
 
     protected void createPlayer(){
@@ -118,7 +130,7 @@ public abstract class Player extends Sprite implements Disposable{
         float playerPositionX;
         float playerPositionY;
 
-        if(!isPlayer1) {
+        if(!isPlayer1Side) {
             playerPositionX = 15.2f;
             playerPositionY = myWorld.getGroundUpperSideY() + standing_lowBox_hy/StreetFighter.PPM;
             headTurn = -0.25f;
@@ -132,68 +144,16 @@ public abstract class Player extends Sprite implements Disposable{
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         player_body = world.createBody(bodyDef);
 
-        //lower body fixture
-        FixtureDef low_fixtureDef = new FixtureDef();
-        PolygonShape low_shape = new PolygonShape();
-        low_shape.setAsBox(standing_lowBox_hx/StreetFighter.PPM, standing_lowBox_hy/StreetFighter.PPM, new Vector2(0, 0),0);
-        low_fixtureDef.shape = low_shape;
-        player_body.createFixture(low_fixtureDef);
-
-        //mid body fixture
-        FixtureDef mid_fixtureDef = new FixtureDef();
-        PolygonShape mid_shape = new PolygonShape();
-        mid_shape.setAsBox(standing_midBox_hx /StreetFighter.PPM, standing_midBox_hy /StreetFighter.PPM,
-                new Vector2(0,  standing_lowBox_hy /StreetFighter.PPM + standing_midBox_hy /StreetFighter.PPM),
-                0);
-        mid_fixtureDef.shape = mid_shape;
-        player_body.createFixture(mid_fixtureDef);
-
-        //high body fixture
-        FixtureDef high_fixtureDef = new FixtureDef();
-        PolygonShape high_shape = new PolygonShape();
-        high_shape.setAsBox(standing_highBox_hx /StreetFighter.PPM, standing_highBox_hy /StreetFighter.PPM,
-                new Vector2(0, (standing_lowBox_hy /StreetFighter.PPM + (standing_midBox_hy /StreetFighter.PPM * 2) + standing_highBox_hy /StreetFighter.PPM)),
-                0);
-        high_fixtureDef.shape = high_shape;
-        player_body.createFixture(high_fixtureDef);
-
-        //head body fixture
-        FixtureDef head_fixtureDef = new FixtureDef();
-        PolygonShape head_shape = new PolygonShape();
-        head_shape.setAsBox(standing_headBox_hx /StreetFighter.PPM, standing_headBox_hy /StreetFighter.PPM,
-                new Vector2(headTurn, (standing_lowBox_hy /StreetFighter.PPM + (standing_midBox_hy /StreetFighter.PPM * 2) + (standing_highBox_hy /StreetFighter.PPM * 2) + standing_headBox_hy /StreetFighter.PPM)),
-                0);
-        head_fixtureDef.shape = head_shape;
-        player_body.createFixture(head_fixtureDef);
-
-        player_body.setUserData("standing");
-
+        setBodyFixtures();
     }
 
-    public boolean isAnimationFinished(Animation animation){
-        return animation.isAnimationFinished(this.stateTimer);
-    }
-
-    public boolean isOnFrame(Animation animation, int frame){
-
-             float totalFramesAmount = animation.getAnimationDuration()/animation.getFrameDuration();
-
-             if(frame * animation.getFrameDuration() == stateTimer)
-                 return true;
-             else return false;
-    }
-
-    protected void setBodyState(){
+    protected void setBodyFixtures(){
         String userData = "";
 
-        int lowBox_hx;
-        int lowBox_hy;
-        int midBox_hx;
-        int midBox_hy;
-        int highBox_hx;
-        int highBox_hy;
-        int headBox_hx;
-        int headBox_hy;
+        int lowBox_hx; int lowBox_hy;
+        int midBox_hx; int midBox_hy;
+        int highBox_hx; int highBox_hy;
+        int headBox_hx; int headBox_hy;
 
         if(crouching == false) {
            lowBox_hx = standing_lowBox_hx;
@@ -260,12 +220,7 @@ public abstract class Player extends Sprite implements Disposable{
         player_body.createFixture(head_fixtureDef);
     }
 
-
-    protected void changeFixtures(){
-
-    }
-
-    public Animation getAnimation(String key){
+    public Animation getAnimation(String key, float frameDuration){
         TextureRegion textureRegion = textureRegionMap.get(key);
         super.setRegion(textureRegion);
 
@@ -278,7 +233,7 @@ public abstract class Player extends Sprite implements Disposable{
             for (int i = 1; i < ((MyTextureRegion) textureRegion).getFramesAmount(); i++) {
                 frames.add(new TextureRegion(getTexture(), x + i * ((MyTextureRegion) textureRegion).getWidth(), y, ((MyTextureRegion) textureRegion).getWidth(), ((MyTextureRegion) textureRegion).getHeight()));
             }
-            Animation animation = new Animation(0.065f, frames); //0.1 default (less = faster)
+            Animation animation = new Animation(frameDuration, frames); //0.1 default (less = faster)
             frames.clear();
 
             return animation;
@@ -352,26 +307,49 @@ public abstract class Player extends Sprite implements Disposable{
         return animation;
     }
 
-
     public void update(float delta){
-        setRegion(getFrame(delta));
+        TextureRegion region = getFrame(delta);
+
+        setRegion(region);
+
+        //change side
+        if(!isPlayer1Side){
+            flip(true,false);
+            if (!isAnimationSwapped)
+                turnSides();
+        }
+
         setBounds((player_body.getPosition().x - getWidth() / 2), player_body.getPosition().y - (standing_lowBox_hy/StreetFighter.PPM),
-                (((MyTextureRegion) currentTextureRegion).getWidth() * widthScalingFactor)/StreetFighter.PPM,     //scaling
-                (((MyTextureRegion) currentTextureRegion).getHeight() * heightScalingFactor)/StreetFighter.PPM); //scaling
+                (region.getRegionWidth() * widthScalingFactor)/StreetFighter.PPM,     //scaling
+                (region.getRegionHeight() * heightScalingFactor)/StreetFighter.PPM); //scaling
 
         //if  current animation width and height is different from previous animation - we need to setPosition after setBounds (like setting position before and after scaling )
         setPosition(player_body.getPosition().x - getWidth() / 2, player_body.getPosition().y - (standing_lowBox_hy/StreetFighter.PPM)); //without setPosition() animation lagging
 
-         if(currentState == State.CROUCHING3 || currentState == State.CROUCHING1 || currentState == State.CROUCHING2) {
-             setPosition((player_body.getPosition().x - scaledWidht/ 2), player_body.getPosition().y - (standing_lowBox_hy/StreetFighter.PPM));
-         }
+        if(currentState == State.CROUCHING3 || currentState == State.CROUCHING1 || currentState == State.CROUCHING2) {
+            setPosition((player_body.getPosition().x - scaledWidht/ 2), player_body.getPosition().y - (standing_lowBox_hy/StreetFighter.PPM));
+        }
 
-         //if jumping - use last body.position.y
-         if(currentState != State.JUMPING)
+        //if jumping - use last body.position.y
+        if(currentState != State.JUMPING)
             lastPositionY = player_body.getPosition().y;
-         if(currentState == State.JUMPING) {
-             setPosition((player_body.getPosition().x - scaledWidht/ 2), lastPositionY - (standing_lowBox_hy/StreetFighter.PPM));
-         }
+        if(currentState == State.JUMPING) {
+            setPosition((player_body.getPosition().x - scaledWidht/ 2), lastPositionY - (standing_lowBox_hy/StreetFighter.PPM));
+        }
+
+        if(currentState == State.JUMPINGLEFT || currentState == State.JUMPINGRIGHT){
+            lastPositionY = player_body.getPosition().y;
+            lastPositionX = player_body.getPosition().x;
+        }
+        if(currentState == State.JUMPINGRIGHT) {
+            setPosition((player_body.getPosition().x - getWidth() / 4), lastPositionY - (standing_lowBox_hy / StreetFighter.PPM));
+        }
+        if(currentState == State.JUMPINGLEFT) {
+            setPosition((player_body.getPosition().x - getWidth()), lastPositionY - (standing_lowBox_hy / StreetFighter.PPM));
+        }
+
+
+
     }
 
     public TextureRegion getFrame(float delta){
@@ -381,63 +359,62 @@ public abstract class Player extends Sprite implements Disposable{
         TextureRegion region;
         switch (currentState){
             case STANDING:
-                currentTextureRegion = textureRegionMap.get("standing");
                region = (TextureRegion) standingAnimation.getKeyFrame(stateTimer, true);
                 break;
             case MOVING_RIGHT:
-                currentTextureRegion = textureRegionMap.get("movingRight");
                region = (TextureRegion) movingRightAnimation.getKeyFrame(stateTimer, true);
                 break;
             case MOVING_LEFT:
-                currentTextureRegion = textureRegionMap.get("movingLeft");
                region = (TextureRegion) movingLeftAnimation.getKeyFrame(stateTimer, true);
                 break;
             case CROUCHING1:
-                currentTextureRegion = textureRegionMap.get("crouching");
                 region = (TextureRegion) crouchingAnimation1.getKeyFrame(stateTimer, false);
                 break;
             case CROUCHING2:
-                currentTextureRegion = textureRegionMap.get("crouching");
                 region = (TextureRegion) crouchingAnimation2.getKeyFrame(stateTimer, true);
                 break;
             case CROUCHING3:
-                currentTextureRegion = textureRegionMap.get("crouching");
                 region = (TextureRegion) crouchingAnimation3.getKeyFrame(stateTimer, false);
                 break;
             case JUMPING:
-                currentTextureRegion = textureRegionMap.get("jumping");
                 region = (TextureRegion) jumpingAnimation.getKeyFrame(stateTimer, false);
+                break;
+            case JUMPINGLEFT:
+                region = (TextureRegion) jumpingLeftAnimation.getKeyFrame(stateTimer, false);
+                break;
+            case JUMPINGRIGHT:
+                region = (TextureRegion) jumpingRightAnimation.getKeyFrame(stateTimer, false);
                 break;
 
                 default :
-                    currentTextureRegion = textureRegionMap.get("standing");
                     region = (TextureRegion) standingAnimation.getKeyFrame(stateTimer, true);
                     break;
+
         }
 
-
         if (currentState == State.CROUCHING1 & previousState != State.CROUCHING1)
-            setBodyState();
-
+            setBodyFixtures();
 
          if(((previousState == State.CROUCHING1 & currentState != State.CROUCHING1) || previousState == State.CROUCHING2) &  crouching == false){
-             setBodyState();
+             setBodyFixtures();
          }
-        // rotate sprite on x
-        //region.flip(true,false);
 
         previousState = currentState;
 
         return region;
     }
 
-    public State getState() {
-        State state = State.STANDING;
+    private void turnSides(){
+        Animation tempAnimation = this.movingLeftAnimation;
+        this.movingLeftAnimation = movingRightAnimation;
+        movingRightAnimation = tempAnimation;
 
-        if(previousState == State.JUMPING & jumpingAnimation.isAnimationFinished(stateTimer))
-        {
-            jumping = false;
-        }
+        isAnimationSwapped = true;
+    }
+
+    private State getState() {
+
+        State state = State.STANDING;
 
         if (player_body.getLinearVelocity().y < 0)
             state = State.FALLING;
@@ -445,6 +422,7 @@ public abstract class Player extends Sprite implements Disposable{
             state = State.MOVING_RIGHT;
          if (player_body.getLinearVelocity().x < 0)
             state = State.MOVING_LEFT;
+
          if (crouching == true) {
             if ((previousState == State.STANDING || previousState == State.CROUCHING1) && previousState != State.CROUCHING2) {
                 state = State.CROUCHING1;
@@ -472,6 +450,20 @@ public abstract class Player extends Sprite implements Disposable{
         if(jumping == true){
              state = State.JUMPING;
         }
+
+        if(previousState == State.JUMPING & jumpingAnimation.isAnimationFinished(stateTimer)) {
+            jumping = false;
+        }
+
+        if(currentState == State.JUMPINGRIGHT)
+            state = State.JUMPINGRIGHT;
+        if(currentState == State.JUMPINGLEFT)
+            state = State.JUMPINGLEFT;
+
+        if(currentState == State.JUMPINGRIGHT & jumpingRightAnimation.isAnimationFinished(stateTimer))
+            state = State.STANDING;
+        if(currentState == State.JUMPINGLEFT & jumpingLeftAnimation.isAnimationFinished(stateTimer))
+            state = State.STANDING;
 
         return state;
     }

@@ -1,0 +1,13 @@
+
+Ryu_jumpingLeft.png
+size: 8192,512
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+ryu_jumping_left_sprite_sheet
+  rotate: false
+  xy: 0, 0
+  size: 4480, 380
+  orig: 4480, 380
+  offset: 0, 0
+  index: -1

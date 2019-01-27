@@ -15,13 +15,15 @@ public class Ryu extends Player {
         setFixtures();
         createPlayer();
 
-        standingAnimation = getAnimation("standing");
-        movingRightAnimation = getAnimation("movingRight");
-        movingLeftAnimation = getAnimation("movingLeft");
+        standingAnimation = getAnimation("standing",0.065f);
+        movingRightAnimation = getAnimation("movingRight",0.065f);
+        movingLeftAnimation = getAnimation("movingLeft",0.065f);
         crouchingAnimation1 = getAnimation("crouching", 0, 3, 0.025f);
         crouchingAnimation2 = getAnimation("crouching", 4,8, 0.2f);
         crouchingAnimation3 = getAnimation("crouching",9,11,0.025f );
         jumpingAnimation = getJumpingAnimation("jumping", 0.02f);
+        jumpingLeftAnimation = getJumpingAnimation("jumpingLeft", 0.02f);
+        jumpingRightAnimation = getJumpingAnimation("jumpingRight", 0.02f);
 
     }
 
@@ -59,6 +61,8 @@ public class Ryu extends Player {
         textureRegionMap.put("movingRight", new MyTextureRegion(basicAtlas.findRegion("ryu_walking_right_sprite_sheet"),112,113,11));
         textureRegionMap.put("movingLeft", new MyTextureRegion(basicAtlas.findRegion("ryu_walking_left_sprite_sheet"),112,113,11));
         textureRegionMap.put("jumping", new MyTextureRegion(jumpingAtlas.findRegion("ryu_jumping_sprite_sheet"),86,192,34));
+        textureRegionMap.put("jumpingLeft", new MyTextureRegion(jumpingLeftAtlas.findRegion("ryu_jumping_left_sprite_sheet"),224,190,38));
+        textureRegionMap.put("jumpingRight", new MyTextureRegion(jumpingRightAtlas.findRegion("ryu_jumping_right_sprite_sheet"),220,182,37));
     }
 
     @Override
@@ -76,5 +80,7 @@ public class Ryu extends Player {
     public void dispose() {
         screen.manager.unload("StreetFighter3_Resources/Sprites/Ryu/packs/Ryu_basic_pack.atlas");
         screen.manager.unload("StreetFighter3_Resources/Sprites/Ryu/packs/Ryu_Jumping_pack.atlas");
+        screen.manager.unload("StreetFighter3_Resources/Sprites/Ryu/packs/Ryu_jumpingLeft.atlas");
+        screen.manager.unload("StreetFighter3_Resources/Sprites/Ryu/packs/Ryu_jumpingRight.atlas");
     }
 }
