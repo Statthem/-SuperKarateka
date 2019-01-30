@@ -307,6 +307,10 @@ public abstract class Player extends Sprite implements Disposable{
         return animation;
     }
 
+    public boolean isAnimationFinished(Animation animation){
+        return animation.isAnimationFinished(stateTimer);
+    }
+
     public void update(float delta){
         TextureRegion region = getFrame(delta);
 
@@ -327,25 +331,24 @@ public abstract class Player extends Sprite implements Disposable{
         setPosition(player_body.getPosition().x - getWidth() / 2, player_body.getPosition().y - (standing_lowBox_hy/StreetFighter.PPM)); //without setPosition() animation lagging
 
         if(currentState == State.CROUCHING3 || currentState == State.CROUCHING1 || currentState == State.CROUCHING2) {
-            setPosition((player_body.getPosition().x - scaledWidht/ 2), player_body.getPosition().y - (standing_lowBox_hy/StreetFighter.PPM));
+            setPosition((player_body.getPosition().x - scaledWidht/2), player_body.getPosition().y - (standing_lowBox_hy/StreetFighter.PPM));
         }
 
         //if jumping - use last body.position.y
-        if(currentState != State.JUMPING)
+        if(currentState != State.JUMPING & currentState != State.JUMPINGLEFT & currentState != State.JUMPINGRIGHT){
             lastPositionY = player_body.getPosition().y;
+            lastPositionX = player_body.getPosition().x;
+        }
+
         if(currentState == State.JUMPING) {
             setPosition((player_body.getPosition().x - scaledWidht/ 2), lastPositionY - (standing_lowBox_hy/StreetFighter.PPM));
         }
 
-        if(currentState == State.JUMPINGLEFT || currentState == State.JUMPINGRIGHT){
-            lastPositionY = player_body.getPosition().y;
-            lastPositionX = player_body.getPosition().x;
-        }
         if(currentState == State.JUMPINGRIGHT) {
-            setPosition((player_body.getPosition().x - getWidth() / 4), lastPositionY - (standing_lowBox_hy / StreetFighter.PPM));
+            setPosition((lastPositionX - getWidth() / 4), lastPositionY - (standing_lowBox_hy / StreetFighter.PPM));
         }
         if(currentState == State.JUMPINGLEFT) {
-            setPosition((player_body.getPosition().x - getWidth()), lastPositionY - (standing_lowBox_hy / StreetFighter.PPM));
+            setPosition((lastPositionX - getWidth()), lastPositionY - (standing_lowBox_hy / StreetFighter.PPM));
         }
 
 
@@ -353,7 +356,6 @@ public abstract class Player extends Sprite implements Disposable{
     }
 
     public TextureRegion getFrame(float delta){
-        currentState = getState();
         stateTimer = currentState == previousState ? stateTimer + delta : 0;
 
         TextureRegion region;
@@ -392,16 +394,21 @@ public abstract class Player extends Sprite implements Disposable{
 
         }
 
-        if (currentState == State.CROUCHING1 & previousState != State.CROUCHING1)
-            setBodyFixtures();
 
-         if(((previousState == State.CROUCHING1 & currentState != State.CROUCHING1) || previousState == State.CROUCHING2) &  crouching == false){
-             setBodyFixtures();
-         }
+       checkForFixturesChange();
 
         previousState = currentState;
 
         return region;
+    }
+
+    public void checkForFixturesChange(){
+        if (currentState == State.CROUCHING1 & previousState != State.CROUCHING1)
+            setBodyFixtures();
+
+        if(((previousState == State.CROUCHING1 & currentState != State.CROUCHING1) || previousState == State.CROUCHING2) &  crouching == false){
+            setBodyFixtures();
+        }
     }
 
     private void turnSides(){
@@ -409,63 +416,11 @@ public abstract class Player extends Sprite implements Disposable{
         this.movingLeftAnimation = movingRightAnimation;
         movingRightAnimation = tempAnimation;
 
+        tempAnimation = this.jumpingLeftAnimation;
+        this.jumpingLeftAnimation = jumpingRightAnimation;
+        jumpingRightAnimation = tempAnimation;
+
         isAnimationSwapped = true;
-    }
-
-    private State getState() {
-
-        State state = State.STANDING;
-
-        if (player_body.getLinearVelocity().y < 0)
-            state = State.FALLING;
-        if (player_body.getLinearVelocity().x > 0)
-            state = State.MOVING_RIGHT;
-         if (player_body.getLinearVelocity().x < 0)
-            state = State.MOVING_LEFT;
-
-         if (crouching == true) {
-            if ((previousState == State.STANDING || previousState == State.CROUCHING1) && previousState != State.CROUCHING2) {
-                state = State.CROUCHING1;
-            }
-            if ((previousState == State.CROUCHING1 & currentState == State.CROUCHING1 & crouchingAnimation1.isAnimationFinished(stateTimer)) || previousState == State.CROUCHING2){
-                state = State.CROUCHING2;
-            }
-        }
-        if(crouching == false ){
-            if(previousState == State.CROUCHING1 & !crouchingAnimation1.isAnimationFinished(stateTimer)) {
-                state = State.CROUCHING1;
-            }
-            if(previousState == State.CROUCHING1 & crouchingAnimation1.isAnimationFinished(stateTimer)) {
-                state = State.CROUCHING3;
-            }
-             if((previousState == State.CROUCHING1 & crouchingAnimation1.isAnimationFinished(stateTimer)) ||  previousState == State.CROUCHING2 || previousState == State.CROUCHING3) {
-                 state = State.CROUCHING3;
-             }
-
-            if(previousState == State.CROUCHING3 & crouchingAnimation3.isAnimationFinished(stateTimer)){
-                state = State.STANDING;
-            }
-        }
-
-        if(jumping == true){
-             state = State.JUMPING;
-        }
-
-        if(previousState == State.JUMPING & jumpingAnimation.isAnimationFinished(stateTimer)) {
-            jumping = false;
-        }
-
-        if(currentState == State.JUMPINGRIGHT)
-            state = State.JUMPINGRIGHT;
-        if(currentState == State.JUMPINGLEFT)
-            state = State.JUMPINGLEFT;
-
-        if(currentState == State.JUMPINGRIGHT & jumpingRightAnimation.isAnimationFinished(stateTimer))
-            state = State.STANDING;
-        if(currentState == State.JUMPINGLEFT & jumpingLeftAnimation.isAnimationFinished(stateTimer))
-            state = State.STANDING;
-
-        return state;
     }
 
     public State getCurrentState() {

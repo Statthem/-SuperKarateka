@@ -20,11 +20,10 @@ public class Ryu extends Player {
         movingLeftAnimation = getAnimation("movingLeft",0.065f);
         crouchingAnimation1 = getAnimation("crouching", 0, 3, 0.025f);
         crouchingAnimation2 = getAnimation("crouching", 4,8, 0.2f);
-        crouchingAnimation3 = getAnimation("crouching",9,11,0.025f );
+        crouchingAnimation3 = getAnimation("crouching",9,11,0.035f );
         jumpingAnimation = getJumpingAnimation("jumping", 0.02f);
-        jumpingLeftAnimation = getJumpingAnimation("jumpingLeft", 0.02f);
-        jumpingRightAnimation = getJumpingAnimation("jumpingRight", 0.02f);
-
+        jumpingLeftAnimation = getJumpingAnimation("jumpingLeft", 0.018f);
+        jumpingRightAnimation = getJumpingAnimation("jumpingRight", 0.018f);
     }
 
     @Override
@@ -32,20 +31,20 @@ public class Ryu extends Player {
         sprite_width = 78;
         sprite_height = 111;
 
-        standing_lowBox_hx = 125;
+        standing_lowBox_hx = 100;
         standing_lowBox_hy = 80;
-        standing_midBox_hx = 90;
+        standing_midBox_hx = 80;
         standing_midBox_hy = 85;
-        standing_highBox_hx = 105;
+        standing_highBox_hx = 95;
         standing_highBox_hy = 55;
         standing_headBox_hx = 33;
         standing_headBox_hy = 28;
 
-        crouching_lowBox_hx = 125;
+        crouching_lowBox_hx = 100;
         crouching_lowBox_hy = 50;
         crouching_midBox_hx = 90;
         crouching_midBox_hy = 40;
-        crouching_highBox_hx = 105;
+        crouching_highBox_hx = 95;
         crouching_highBox_hy = 30;
         crouching_headBox_hx = 33;
         crouching_headBox_hy = 28;

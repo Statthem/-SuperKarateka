@@ -6,10 +6,6 @@ public class Utils {
 
     private static float mediumDeltaTime = 0.020f;
 
-    public static boolean isAnimationFinished(Animation animation, float stateTimer){
-        return animation.isAnimationFinished(stateTimer);
-    }
-
     public static boolean isOnFrame(Animation animation, int frame, float stateTimer){
         float totalFramesAmount = animation.getAnimationDuration()/animation.getFrameDuration();
 
