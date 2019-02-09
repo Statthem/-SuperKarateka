@@ -1,7 +1,9 @@
 package com.mygdx.game.sprites;
 
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.mygdx.game.StreetFighter;
+import com.mygdx.game.contact_listeners.PlayerContactListener;
 import com.mygdx.game.extended.MyTextureRegion;
 import com.mygdx.game.screens.PlayScreen;
 import com.mygdx.game.world.MyWorld;
@@ -9,7 +11,7 @@ import com.mygdx.game.world.MyWorld;
 public class Ryu extends Player {
 
     public Ryu(PlayScreen screen, boolean isPlayer1, MyWorld myWorld) {
-        super(screen, isPlayer1, myWorld);
+        super(screen, isPlayer1,myWorld);
 
         populateTextureRegionMap();
         setFixtures();
@@ -24,6 +26,9 @@ public class Ryu extends Player {
         jumpingAnimation = getJumpingAnimation("jumping", 0.02f);
         jumpingLeftAnimation = getJumpingAnimation("jumpingLeft", 0.018f);
         jumpingRightAnimation = getJumpingAnimation("jumpingRight", 0.018f);
+
+        if(!isPlayer1)
+            turnSides();
     }
 
     @Override
@@ -31,20 +36,20 @@ public class Ryu extends Player {
         sprite_width = 78;
         sprite_height = 111;
 
-        standing_lowBox_hx = 100;
+        standing_lowBox_hx = 95;
         standing_lowBox_hy = 80;
-        standing_midBox_hx = 80;
+        standing_midBox_hx = 75;
         standing_midBox_hy = 85;
-        standing_highBox_hx = 95;
+        standing_highBox_hx = 90;
         standing_highBox_hy = 55;
         standing_headBox_hx = 33;
         standing_headBox_hy = 28;
 
-        crouching_lowBox_hx = 100;
+        crouching_lowBox_hx = 95;
         crouching_lowBox_hy = 50;
-        crouching_midBox_hx = 90;
+        crouching_midBox_hx = 85;
         crouching_midBox_hy = 40;
-        crouching_highBox_hx = 95;
+        crouching_highBox_hx = 90;
         crouching_highBox_hy = 30;
         crouching_headBox_hx = 33;
         crouching_headBox_hy = 28;

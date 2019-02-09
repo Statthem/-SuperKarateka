@@ -2,6 +2,8 @@ package com.mygdx.game.UDP;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 import android.annotation.SuppressLint;
@@ -20,10 +22,10 @@ public class UDP_Client {
                 DatagramSocket ds = null;
 
                 try {
+                    InetAddress addr = InetAddress.getByName("213.110.160.99");
                     ds = new DatagramSocket();
                     DatagramPacket dp;
-                    dp = new DatagramPacket(Message.getBytes(), Message.length(), 255);
-                    ds.setBroadcast(true);
+                    dp = new DatagramPacket(Message.getBytes(), Message.length(),addr,5050);
                     ds.send(dp);
                 } catch (Exception e) {
                     e.printStackTrace();

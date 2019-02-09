@@ -1,15 +1,22 @@
 package com.mygdx.game.UDP;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.support.v7.app.AppCompatActivity;
 
 import com.mygdx.game.MainActivity;
 
-public class UDP_Server
-{
+public class UDP_Server{
+
+    public static Intent intent;
+    public static AppCompatActivity activity;
     private AsyncTask<Void, Void, Void> async;
     private boolean Server_aktiv = true;
 
@@ -27,16 +34,19 @@ public class UDP_Server
 
                 try
                 {
-                    ds = new DatagramSocket(5050);
+                    ds = new DatagramSocket(null);
+
+                    InetAddress addr = InetAddress.getByName("localhost");
+                    ds.bind(new InetSocketAddress(InetAddress.getByName("192.168.10.3"),5050));
+                    ds.send(dp);
 
                     while(Server_aktiv)
                     {
                         ds.receive(dp);
-
-                        Intent i = new Intent();
-                        i.setAction("message received");
-                        i.putExtra("hello", new String(lMsg, 0, dp.getLength()));
-                        MainActivity.context.sendBroadcast(i);
+                        System.out.println("ORAORAORAORAORAORA");
+                        System.out.println(new String(lMsg, 0, dp.getLength()));
+                        intent.putExtra(MainActivity.EXTRA_MESSAGE,new String(lMsg, 0, dp.getLength()));
+                        activity.startActivity(intent);
                     }
                 }
                 catch (Exception e)
@@ -59,8 +69,7 @@ public class UDP_Server
         else async.execute();
     }
 
-    public void stop_UDP_Server()
-    {
+    public void stop_UDP_Server(){
         Server_aktiv = false;
     }
 }

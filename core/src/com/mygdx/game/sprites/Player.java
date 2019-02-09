@@ -7,11 +7,16 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.EdgeShape;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.game.StreetFighter;
+import com.mygdx.game.contact_listeners.PlayerContactListener;
 import com.mygdx.game.world.MyWorld;
 import com.mygdx.game.extended.MyTextureRegion;
 import com.mygdx.game.screens.PlayScreen;
@@ -21,7 +26,7 @@ import java.util.Map;
 
 
 public abstract class Player extends Sprite implements Disposable{
-    public enum State {STANDING, CROUCHING1, CROUCHING2, CROUCHING3, MOVING_RIGHT, MOVING_LEFT, JUMPING, JUMPINGLEFT, JUMPINGRIGHT, FALLING, FIGHTING, HITSTUN}
+    public enum State {STANDING, CROUCHING1, CROUCHING2, CROUCHING3, MOVING_RIGHT, MOVING_LEFT, JUMPING, JUMPINGLEFT, JUMPINGRIGHT, FALLING, FIGHTING, HITSTUN, COLIDING}
     private State currentState;
     private State previousState;
 
@@ -79,8 +84,7 @@ public abstract class Player extends Sprite implements Disposable{
     public boolean crouching;
     public boolean jumping;
 
-    private boolean isPlayer1Side;
-    private boolean isAnimationSwapped;
+    public boolean isPlayer1Side;
 
     private com.badlogic.gdx.physics.box2d.World world;
     public Body player_body;
@@ -88,11 +92,19 @@ public abstract class Player extends Sprite implements Disposable{
     private float lastPositionY;
     private float lastPositionX;
 
+    public float maxJumpHeight = 7f;
+    public float walkingBackSpeed = -5f;
+    public float walkingForwardSpeed = 6f;
+
+    public float currentSpeed;
+
+
     public Player(PlayScreen screen, boolean isPlayer1, MyWorld myWorld){
         super();
         this.screen = screen;
         this.myWorld = myWorld;
         this.world = MyWorld.world;
+
 
         String simpleClassName = this.getClass().getSimpleName();
 
@@ -108,7 +120,6 @@ public abstract class Player extends Sprite implements Disposable{
         jumpingRightAtlas = screen.manager.get("StreetFighter3_Resources/Sprites/" + simpleClassName + "/packs/" + simpleClassName + "_jumpingRight.atlas");
 
         isPlayer1Side = isPlayer1;
-        isAnimationSwapped = false;
 
         crouching = false;
 
@@ -124,48 +135,44 @@ public abstract class Player extends Sprite implements Disposable{
     protected abstract void setFixtures();
     protected abstract void populateTextureRegionMap();
 
-    protected void createPlayer(){
+    protected void createPlayer() {
         BodyDef bodyDef = new BodyDef();
 
         float playerPositionX;
         float playerPositionY;
 
-        if(!isPlayer1Side) {
-            playerPositionX = 15.2f;
-            playerPositionY = myWorld.getGroundUpperSideY() + standing_lowBox_hy/StreetFighter.PPM;
-            headTurn = -0.25f;
-        } else {
-            playerPositionX = 4.2f;
-            playerPositionY = myWorld.getGroundUpperSideY() + standing_lowBox_hy/StreetFighter.PPM;
-            headTurn = 0.25f;
-        }
-
-        bodyDef.position.set(playerPositionX, playerPositionY); // x, y of body center
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
-        player_body = world.createBody(bodyDef);
-
-        setBodyFixtures();
-    }
-
-    protected void setBodyFixtures(){
         String userData = "";
 
-        int lowBox_hx; int lowBox_hy;
-        int midBox_hx; int midBox_hy;
-        int highBox_hx; int highBox_hy;
-        int headBox_hx; int headBox_hy;
+        if (!isPlayer1Side) {
+            playerPositionX = 8.2f;
+            playerPositionY = myWorld.getGroundUpperSideY() + standing_lowBox_hy / StreetFighter.PPM;
+            userData = "player2";
+        } else {
+            playerPositionX = 4.2f;
+            playerPositionY = myWorld.getGroundUpperSideY() + standing_lowBox_hy / StreetFighter.PPM;
+            userData = "player1";
+        }
 
-        if(crouching == false) {
-           lowBox_hx = standing_lowBox_hx;
-           lowBox_hy = standing_lowBox_hy;
-           midBox_hx = standing_midBox_hx;
-           midBox_hy = standing_midBox_hy;
-           highBox_hx = standing_highBox_hx;
-           highBox_hy = standing_highBox_hy;
-           headBox_hx = standing_headBox_hx;
-           headBox_hy = standing_headBox_hy;
+        headTurn = 0.25f;
 
-           userData = "standing";
+        int lowBox_hx;
+        int lowBox_hy;
+        int midBox_hx;
+        int midBox_hy;
+        int highBox_hx;
+        int highBox_hy;
+        int headBox_hx;
+        int headBox_hy;
+
+        if (crouching == false) {
+            lowBox_hx = standing_lowBox_hx;
+            lowBox_hy = standing_lowBox_hy;
+            midBox_hx = standing_midBox_hx;
+            midBox_hy = standing_midBox_hy;
+            highBox_hx = standing_highBox_hx;
+            highBox_hy = standing_highBox_hy;
+            headBox_hx = standing_headBox_hx;
+            headBox_hy = standing_headBox_hy;
         } else {
             lowBox_hx = crouching_lowBox_hx;
             lowBox_hy = crouching_lowBox_hy;
@@ -175,49 +182,98 @@ public abstract class Player extends Sprite implements Disposable{
             highBox_hy = crouching_highBox_hy;
             headBox_hx = crouching_headBox_hx;
             headBox_hy = crouching_headBox_hy;
-
-            userData = "crouching";
         }
+        bodyDef.position.set(playerPositionX, playerPositionY); // x, y of body center
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        player_body = world.createBody(bodyDef);
 
-        //lower body fixture
-        FixtureDef low_fixtureDef = new FixtureDef();
+        FixtureDef fixtureDef = new FixtureDef();
+        //fixtureDef.isSensor = true;
         PolygonShape low_shape = new PolygonShape();
-        low_shape.setAsBox(lowBox_hx/StreetFighter.PPM, lowBox_hy /StreetFighter.PPM, new Vector2(0, 0),0);
-        low_fixtureDef.shape = low_shape;
+        low_shape.setAsBox(lowBox_hx / StreetFighter.PPM, lowBox_hy / StreetFighter.PPM, new Vector2(0, 0), 0);
+        fixtureDef.shape = low_shape;
+        player_body.createFixture(fixtureDef).setUserData("low");
 
-
-        //mid body fixture
-        FixtureDef mid_fixtureDef = new FixtureDef();
+        fixtureDef.isSensor = true;
         PolygonShape mid_shape = new PolygonShape();
-        mid_shape.setAsBox(midBox_hx /StreetFighter.PPM, midBox_hy /StreetFighter.PPM,
-                new Vector2(0,  lowBox_hy /StreetFighter.PPM + midBox_hy /StreetFighter.PPM),
+        mid_shape.setAsBox(midBox_hx / StreetFighter.PPM, midBox_hy / StreetFighter.PPM,
+                new Vector2(0, lowBox_hy / StreetFighter.PPM + midBox_hy / StreetFighter.PPM),
                 0);
-        mid_fixtureDef.shape = mid_shape;
+        fixtureDef.shape = mid_shape;
+        player_body.createFixture(fixtureDef).setUserData("mid");
 
-        //high body fixture
-        FixtureDef high_fixtureDef = new FixtureDef();
+//        EdgeShape mid_upper_edge = new EdgeShape();
+//        mid_upper_edge.set(new Vector2(100/StreetFighter.PPM, lowBox_hy / StreetFighter.PPM + (midBox_hy * 2)/ StreetFighter.PPM), new Vector2(-100/StreetFighter.PPM,lowBox_hy / StreetFighter.PPM + (midBox_hy * 2)/ StreetFighter.PPM));
+//        fixtureDef.shape = mid_upper_edge;
+//        player_body.createFixture(fixtureDef).setUserData("mid_upper_edge");
+
+        fixtureDef.isSensor = true;
         PolygonShape high_shape = new PolygonShape();
-        high_shape.setAsBox(highBox_hx /StreetFighter.PPM, highBox_hy /StreetFighter.PPM,
-                new Vector2(0, (lowBox_hy /StreetFighter.PPM + (midBox_hy /StreetFighter.PPM * 2) + highBox_hy /StreetFighter.PPM)),
+        high_shape.setAsBox(highBox_hx / StreetFighter.PPM, highBox_hy / StreetFighter.PPM,
+                new Vector2(0, (lowBox_hy / StreetFighter.PPM + (midBox_hy / StreetFighter.PPM * 2) + highBox_hy / StreetFighter.PPM)),
                 0);
-        high_fixtureDef.shape = high_shape;
+        fixtureDef.shape = high_shape;
+        player_body.createFixture(fixtureDef).setUserData("high");
 
-        //head body fixture
-        FixtureDef head_fixtureDef = new FixtureDef();
+        fixtureDef.isSensor = true;
         PolygonShape head_shape = new PolygonShape();
-        head_shape.setAsBox(headBox_hx /StreetFighter.PPM, headBox_hy /StreetFighter.PPM,
-                new Vector2(headTurn, (lowBox_hy /StreetFighter.PPM + (midBox_hy /StreetFighter.PPM * 2) + (highBox_hy /StreetFighter.PPM * 2) + headBox_hy /StreetFighter.PPM)),
+        head_shape.setAsBox(headBox_hx / StreetFighter.PPM, headBox_hy / StreetFighter.PPM,
+                new Vector2(headTurn, (lowBox_hy / StreetFighter.PPM + (midBox_hy / StreetFighter.PPM * 2) + (highBox_hy / StreetFighter.PPM * 2) + headBox_hy / StreetFighter.PPM)),
                 0);
-        head_fixtureDef.shape = head_shape;
+        fixtureDef.shape = head_shape;
+        player_body.createFixture(fixtureDef).setUserData("head");
 
         player_body.setUserData(userData);
+    }
 
-        player_body.getFixtureList().clear();
+    public void changeFixturesShape(){
+        Array<Fixture> fixtures = player_body.getFixtureList();
+        if(fixtures.size != 0){
 
-        player_body.createFixture(low_fixtureDef);
-        player_body.createFixture(mid_fixtureDef);
-        player_body.createFixture(high_fixtureDef);
-        player_body.createFixture(head_fixtureDef);
+            int lowBox_hx; int lowBox_hy;
+            int midBox_hx; int midBox_hy;
+            int highBox_hx; int highBox_hy;
+            int headBox_hx; int headBox_hy;
+
+            if(crouching == false) {
+                lowBox_hx = standing_lowBox_hx;
+                lowBox_hy = standing_lowBox_hy;
+                midBox_hx = standing_midBox_hx;
+                midBox_hy = standing_midBox_hy;
+                highBox_hx = standing_highBox_hx;
+                highBox_hy = standing_highBox_hy;
+                headBox_hx = standing_headBox_hx;
+                headBox_hy = standing_headBox_hy;
+            } else {
+                lowBox_hx = crouching_lowBox_hx;
+                lowBox_hy = crouching_lowBox_hy;
+                midBox_hx = crouching_midBox_hx;
+                midBox_hy = crouching_midBox_hy;
+                highBox_hx = crouching_highBox_hx;
+                highBox_hy = crouching_highBox_hy;
+                headBox_hx = crouching_headBox_hx;
+                headBox_hy = crouching_headBox_hy;
+            }
+
+            PolygonShape low_shape = (PolygonShape) fixtures.get(0).getShape();
+            PolygonShape mid_shape = (PolygonShape) fixtures.get(1).getShape();
+            PolygonShape high_shape = (PolygonShape) fixtures.get(2).getShape();
+            PolygonShape head_shape = (PolygonShape) fixtures.get(3).getShape();
+
+
+            low_shape.setAsBox(lowBox_hx/StreetFighter.PPM, lowBox_hy/StreetFighter.PPM,
+                    new Vector2(0, 0),
+                    0);
+            mid_shape.setAsBox(midBox_hx/StreetFighter.PPM, midBox_hy/StreetFighter.PPM,
+                    new Vector2(0,  lowBox_hy /StreetFighter.PPM + midBox_hy /StreetFighter.PPM),
+                    0);
+            high_shape.setAsBox(highBox_hx/StreetFighter.PPM, highBox_hy/StreetFighter.PPM,
+                    new Vector2(0, (lowBox_hy /StreetFighter.PPM + (midBox_hy /StreetFighter.PPM * 2) + highBox_hy /StreetFighter.PPM)),
+                    0);
+            head_shape.setAsBox(headBox_hx /StreetFighter.PPM, headBox_hy /StreetFighter.PPM,
+                    new Vector2(headTurn, (lowBox_hy /StreetFighter.PPM + (midBox_hy /StreetFighter.PPM * 2) + (highBox_hy /StreetFighter.PPM * 2) + headBox_hy /StreetFighter.PPM)),
+                    0);
+        }
     }
 
     public Animation getAnimation(String key, float frameDuration){
@@ -316,12 +372,10 @@ public abstract class Player extends Sprite implements Disposable{
 
         setRegion(region);
 
-        //change side
-        if(!isPlayer1Side){
+        //flip sprite
+        if(!isPlayer1Side)
             flip(true,false);
-            if (!isAnimationSwapped)
-                turnSides();
-        }
+
 
         setBounds((player_body.getPosition().x - getWidth() / 2), player_body.getPosition().y - (standing_lowBox_hy/StreetFighter.PPM),
                 (region.getRegionWidth() * widthScalingFactor)/StreetFighter.PPM,     //scaling
@@ -404,14 +458,14 @@ public abstract class Player extends Sprite implements Disposable{
 
     public void checkForFixturesChange(){
         if (currentState == State.CROUCHING1 & previousState != State.CROUCHING1)
-            setBodyFixtures();
+            changeFixturesShape();
 
         if(((previousState == State.CROUCHING1 & currentState != State.CROUCHING1) || previousState == State.CROUCHING2) &  crouching == false){
-            setBodyFixtures();
+            changeFixturesShape();
         }
     }
 
-    private void turnSides(){
+    public void turnSides(){
         Animation tempAnimation = this.movingLeftAnimation;
         this.movingLeftAnimation = movingRightAnimation;
         movingRightAnimation = tempAnimation;
@@ -420,7 +474,12 @@ public abstract class Player extends Sprite implements Disposable{
         this.jumpingLeftAnimation = jumpingRightAnimation;
         jumpingRightAnimation = tempAnimation;
 
-        isAnimationSwapped = true;
+        float tempSpeed = walkingForwardSpeed;
+        walkingForwardSpeed = -1 * walkingBackSpeed;
+        walkingBackSpeed = -1 * tempSpeed;
+
+        headTurn = headTurn * -1;
+        changeFixturesShape();
     }
 
     public State getCurrentState() {
