@@ -43,28 +43,34 @@ public class PlayerContactListener implements ContactListener {
             player2.turnSides();
         }
 
+        //check if players overlap each other on X-Axis
+        if(player1.getPlayer_body().getPosition().x > player2.getPlayer_body().getPosition().x - (player2.getPlayerWidth()/2 + player1.getPlayerWidth()/2)/StreetFighter.PPM
+                & player1.getPlayer_body().getPosition().x < player2.getPlayer_body().getPosition().x + (player2.getPlayerWidth()/2 + player1.getPlayerWidth()/2)/StreetFighter.PPM ) {
 
+
+        }
 
         Fixture fixtureA = contact.getFixtureA();
         Fixture fixtureB = contact.getFixtureB();
 
 
-        //do something with this!
-        if(player1.getPlayer_body().getPosition().x > player2.getPlayer_body().getPosition().x - 190/StreetFighter.PPM & player1.getPlayer_body().getPosition().x < player2.getPlayer_body().getPosition().x + 190/StreetFighter.PPM ){
-
             if((fixtureA.getUserData() == "high" & fixtureB.getUserData() == "low") || (fixtureB.getUserData() == "high" & fixtureA.getUserData() == "low")){
                 Fixture highFixture = fixtureA.getUserData() == "mid" ? fixtureA : fixtureB;
                 Fixture lowFixture = highFixture == fixtureA ? fixtureB : fixtureA;
 
-                System.out.println(Math.abs(player1.getCurrentSpeed() + 0.7));
                 if(lowFixture.getBody().getUserData() == "player2") {
-                    player2.setCurrentSpeed(((player2.getCurrentSpeed() * -1) - 0.7f) * -1);
+                    if(player2.getCurrentSpeed() > 0)
+                        player2.setCurrentSpeed((player2.getCurrentSpeed() + 0.75f));
+                    if(player2.getCurrentSpeed() < 0)
+                        player2.setCurrentSpeed((player2.getCurrentSpeed() - 0.75f));
                 } else if(lowFixture.getBody().getUserData() == "player1"){
-                    if(Math.abs(player1.getCurrentSpeed()) < Math.abs(player1.getCurrentSpeed() + 0.7))
-
-                    player1.setCurrentSpeed(((player1.getCurrentSpeed() * -1) - 0.7f) * -1);
-                    //Gdx.app.log("Contact", "player1 on player2");
+                    if(player1.getCurrentSpeed() > 0)
+                    player1.setCurrentSpeed((player1.getCurrentSpeed() + 0.75f));
+                    if(player1.getCurrentSpeed() < 0)
+                        player1.setCurrentSpeed((player1.getCurrentSpeed() - 0.75f));
                 }
+
+                Gdx.app.log("Contact", player1.getCurrentSpeed() + "");
 
                 float distance = (player2.getPlayer_body().getPosition().x - player1.getPlayer_body().getPosition().x)/StreetFighter.PPM;
                 float maxSpeed = 200f/100f;
@@ -83,7 +89,6 @@ public class PlayerContactListener implements ContactListener {
 
         }
 
-    }
 
     @Override
     public void endContact(Contact contact) {

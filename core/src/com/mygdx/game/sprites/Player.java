@@ -22,7 +22,7 @@ import java.util.Map;
 
 
 public abstract class Player extends Sprite implements Disposable{
-    public enum State {STANDING, CROUCHING1, CROUCHING2, CROUCHING3, MOVING_FORWARD, MOVING_BACK, JUMPING, JUMPING_FORWARD, JUMPING_BACK, FALLING, FIGHTING, HITSTUN, COLIDING}
+    public enum State {STANDING, CROUCHING1, CROUCHING2, CROUCHING3, MOVING_FORWARD, MOVING_BACK, JUMPING, JUMPING_BACK, JUMPING_FORWARD, FALLING, FIGHTING, HITSTUN, COLIDING}
     private State currentState;
     private State previousState;
 
@@ -385,7 +385,7 @@ public abstract class Player extends Sprite implements Disposable{
         }
 
         //if jumping - use last body.position.y
-        if(currentState != State.JUMPING & currentState != State.JUMPING_FORWARD & currentState != State.JUMPING_BACK){
+        if(currentState != State.JUMPING & currentState != State.JUMPING_BACK & currentState != State.JUMPING_FORWARD){
             lastPositionY = player_body.getPosition().y;
             lastPositionX = player_body.getPosition().x;
         }
@@ -394,10 +394,10 @@ public abstract class Player extends Sprite implements Disposable{
             setPosition((player_body.getPosition().x - scaledWidht/ 2), lastPositionY - (standing_lowBox_hy/StreetFighter.PPM));
         }
 
-        if(currentState == State.JUMPING_BACK) {
+        if(currentState == State.JUMPING_FORWARD) {
             setPosition((lastPositionX - getWidth() / 4), lastPositionY - (standing_lowBox_hy / StreetFighter.PPM));
         }
-        if(currentState == State.JUMPING_FORWARD) {
+        if(currentState == State.JUMPING_BACK) {
             setPosition((lastPositionX - getWidth()), lastPositionY - (standing_lowBox_hy / StreetFighter.PPM));
         }
 
@@ -431,10 +431,10 @@ public abstract class Player extends Sprite implements Disposable{
             case JUMPING:
                 region = (TextureRegion) jumpingAnimation.getKeyFrame(stateTimer, false);
                 break;
-            case JUMPING_FORWARD:
+            case JUMPING_BACK:
                 region = (TextureRegion) jumpingLeftAnimation.getKeyFrame(stateTimer, false);
                 break;
-            case JUMPING_BACK:
+            case JUMPING_FORWARD:
                 region = (TextureRegion) jumpingRightAnimation.getKeyFrame(stateTimer, false);
                 break;
 
@@ -514,4 +514,11 @@ public abstract class Player extends Sprite implements Disposable{
         this.currentSpeed = currentSpeed;
     }
 
+    public float getPlayerWidth(){
+        return standing_lowBox_hx * 2;
+    }
+
+    public float getPlayerHeight(){
+        return (standing_lowBox_hy * 2) + (standing_midBox_hy * 2) + (standing_highBox_hy * 2) + (standing_headBox_hy * 2);
+    }
 }

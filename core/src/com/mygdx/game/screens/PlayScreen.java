@@ -133,16 +133,16 @@ public class PlayScreen implements Screen {
                     & !player1.getPreviousState().equals(State.CROUCHING3)
                     & !player1.getPreviousState().equals(State.CROUCHING2)
                     & !player1.getPreviousState().equals(State.CROUCHING1)
-                    & !player1.getPreviousState().equals(State.JUMPING_BACK)
                     & !player1.getPreviousState().equals(State.JUMPING_FORWARD)
+                    & !player1.getPreviousState().equals(State.JUMPING_BACK)
                     & !player1.getPreviousState().equals(State.JUMPING)) {
                 player1.setCurrentState(State.MOVING_BACK);
             }
             if ((stick.isTouched() & (direction == 0.0 || direction == 1 || direction == -1) & stick.getKnobPercentX() != 0)  & !player1.getPreviousState().equals(State.CROUCHING3)
                     & !player1.getPreviousState().equals(State.CROUCHING2)
                     & !player1.getPreviousState().equals(State.CROUCHING1)
-                    & !player1.getPreviousState().equals(State.JUMPING_BACK)
                     & !player1.getPreviousState().equals(State.JUMPING_FORWARD)
+                    & !player1.getPreviousState().equals(State.JUMPING_BACK)
                     & !player1.getPreviousState().equals(State.JUMPING)) {
                 player1.setCurrentState(State.MOVING_FORWARD);
             }
@@ -159,28 +159,28 @@ public class PlayScreen implements Screen {
                     & (player1.getPreviousState().equals(State.STANDING)
                     || player1.getCurrentState().equals(State.MOVING_FORWARD)
                     || player1.getCurrentState().equals(State.MOVING_BACK))){
-                player1.setCurrentState(State.JUMPING_FORWARD);
+                player1.setCurrentState(State.JUMPING_BACK);
                 player1.setCurrentSpeed(player1.jumpingBackSpeed);
             }
             if(stickPreviousDirection == 2 & direction == 1
                     & (player1.getPreviousState().equals(State.STANDING)
                     || player1.getCurrentState().equals(State.MOVING_FORWARD)
                     || player1.getCurrentState().equals(State.MOVING_BACK))){
-                player1.setCurrentState(State.JUMPING_BACK);
+                player1.setCurrentState(State.JUMPING_FORWARD);
                 player1.setCurrentSpeed(player1.jumpingForwardSpeed);
             }
 
 
             if(player1.getPreviousState().equals(State.JUMPING) & player1.isAnimationFinished(player1.jumpingAnimation)
-                    || player1.getPreviousState().equals(State.JUMPING_FORWARD) & player1.isAnimationFinished(player1.jumpingLeftAnimation)
-                    || player1.getPreviousState().equals(State.JUMPING_BACK) & player1.isAnimationFinished(player1.jumpingRightAnimation)) {
+                    || player1.getPreviousState().equals(State.JUMPING_BACK) & player1.isAnimationFinished(player1.jumpingLeftAnimation)
+                    || player1.getPreviousState().equals(State.JUMPING_FORWARD) & player1.isAnimationFinished(player1.jumpingRightAnimation)) {
                 player1.setCurrentState(State.CROUCHING3);
             }
 
             if (!stick.isTouched()
                     & !player1.getCurrentState().equals(State.JUMPING)
-                    & !player1.getCurrentState().equals(State.JUMPING_FORWARD)
                     & !player1.getCurrentState().equals(State.JUMPING_BACK)
+                    & !player1.getCurrentState().equals(State.JUMPING_FORWARD)
                     & !player1.getCurrentState().equals(State.CROUCHING1)
                     & !player1.getCurrentState().equals(State.CROUCHING3)){
                 player1.setCurrentState(State.STANDING);
@@ -188,8 +188,8 @@ public class PlayScreen implements Screen {
             if(stick.isTouched()
                     & stick.getKnobPercentX() == 0
                     & !player1.getCurrentState().equals(State.JUMPING)
-                    & !player1.getCurrentState().equals(State.JUMPING_FORWARD)
                     & !player1.getCurrentState().equals(State.JUMPING_BACK)
+                    & !player1.getCurrentState().equals(State.JUMPING_FORWARD)
                     & !player1.getCurrentState().equals(State.CROUCHING1)
                     & !player1.getCurrentState().equals(State.CROUCHING3)){
                 player1.setCurrentState(State.STANDING);
@@ -253,11 +253,11 @@ public class PlayScreen implements Screen {
         } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
              player2.crouching = true;
         } else if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
-            player2.setCurrentState(Player.State.JUMPING_FORWARD);
-            player2.setCurrentSpeed(-10);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT)) {
             player2.setCurrentState(Player.State.JUMPING_BACK);
-            player2.setCurrentSpeed(7);
+            player2.setCurrentSpeed(player2.jumpingBackSpeed);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT)) {
+            player2.setCurrentState(Player.State.JUMPING_FORWARD);
+            player2.setCurrentSpeed(player2.jumpingForwardSpeed);
         } else if (Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT)) {
             System.out.println("mouse position.x " + (Gdx.input.getX()));
             System.out.println("mouse position.y " + (1080 - Gdx.input.getY()));
@@ -282,22 +282,21 @@ public class PlayScreen implements Screen {
             player.getPlayer_body().setLinearVelocity(0, 15);
         } else if (player.getCurrentState().equals(State.JUMPING) & player.getPlayer_body().getPosition().y >= player.maxJumpHeight) {
             player.getPlayer_body().setLinearVelocity(0, -14);
-        } else if (player.getCurrentState().equals(State.JUMPING_FORWARD) & player.getPlayer_body().getPosition().y <= player.maxJumpHeight & player.getPlayer_body().getLinearVelocity().y >= 0) {
-            player.getPlayer_body().setLinearVelocity(player.getCurrentSpeed(), 11);
-            System.out.println(player.getCurrentSpeed());
-        } else if (player.getCurrentState().equals(State.JUMPING_FORWARD) & player.getPlayer_body().getPosition().y >= player.maxJumpHeight) {
-            player.getPlayer_body().setLinearVelocity(0, -14);
-        } else if (player.getCurrentState().equals(State.JUMPING_FORWARD) & player.getPlayer_body().getLinearVelocity().y < 0) {
-            player.getPlayer_body().setLinearVelocity(player.getCurrentSpeed(), -20);
-        }else if (player.getCurrentState().equals(State.JUMPING_BACK) & player.getPlayer_body().getPosition().y <= player.maxJumpHeight & player.getPlayer_body().getLinearVelocity().y >= 0) {
+        } else if (player.getCurrentState().equals(State.JUMPING_BACK) & player.getPlayer_body().getPosition().y <= player.maxJumpHeight & player.getPlayer_body().getLinearVelocity().y >= 0) {
             player.getPlayer_body().setLinearVelocity(player.getCurrentSpeed(), 11);
         } else if (player.getCurrentState().equals(State.JUMPING_BACK) & player.getPlayer_body().getPosition().y >= player.maxJumpHeight) {
             player.getPlayer_body().setLinearVelocity(0, -14);
         } else if (player.getCurrentState().equals(State.JUMPING_BACK) & player.getPlayer_body().getLinearVelocity().y < 0) {
             player.getPlayer_body().setLinearVelocity(player.getCurrentSpeed(), -20);
+        }else if (player.getCurrentState().equals(State.JUMPING_FORWARD) & player.getPlayer_body().getPosition().y <= player.maxJumpHeight & player.getPlayer_body().getLinearVelocity().y >= 0) {
+            player.getPlayer_body().setLinearVelocity(player.getCurrentSpeed(), 11);
+        } else if (player.getCurrentState().equals(State.JUMPING_FORWARD) & player.getPlayer_body().getPosition().y >= player.maxJumpHeight) {
+            player.getPlayer_body().setLinearVelocity(0, -14);
+        } else if (player.getCurrentState().equals(State.JUMPING_FORWARD) & player.getPlayer_body().getLinearVelocity().y < 0) {
+            player.getPlayer_body().setLinearVelocity(player.getCurrentSpeed(), -20);
         }
 
-        if(player.getCurrentState() != State.JUMPING & player.getCurrentState() != State.JUMPING_FORWARD & player.getCurrentState() != State.JUMPING_BACK & player.getPlayer_body().getPosition().y > 2.21){
+        if(player.getCurrentState() != State.JUMPING & player.getCurrentState() != State.JUMPING_BACK & player.getCurrentState() != State.JUMPING_FORWARD & player.getPlayer_body().getPosition().y > 2.21){
             player.getPlayer_body().setLinearVelocity(0, -11);
         }
     }
