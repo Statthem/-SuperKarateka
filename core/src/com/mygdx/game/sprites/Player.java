@@ -57,7 +57,6 @@ public abstract class Player extends Sprite implements Disposable{
 
     protected float scaledWidht;
 
-    protected Array<Animation> playerAnimations;
     protected Map<String, MyTextureRegion> textureRegionMap;
 
     public TextureAtlas basicAtlas;
@@ -80,29 +79,28 @@ public abstract class Player extends Sprite implements Disposable{
     public boolean crouching;
     public boolean jumping;
 
-    public boolean isPlayer1Side;
+    public  boolean isPlayer1Side;
 
     private com.badlogic.gdx.physics.box2d.World world;
-    public Body player_body;
+
+    private Body player_body;
 
     private float lastPositionY;
     private float lastPositionX;
 
-    public float maxJumpHeight = 7f;
-    public float walkingBackSpeed = -5f;
-    public float walkingForwardSpeed = 6f;
-    public float jumpingForwardSpeed = 7f;
-    public float jumpingBackSpeed = -10f;
+    public static float maxJumpHeight = 7f;
+    public static float walkingBackSpeed = -5f;
+    public static float walkingForwardSpeed = 6f;
+    public static float jumpingForwardSpeed = 7f;
+    public static float jumpingBackSpeed = -10f;
 
-    public float currentSpeed;
-
+    private float currentSpeed;
 
     public Player(PlayScreen screen, boolean isPlayer1, MyWorld myWorld){
         super();
         this.screen = screen;
         this.myWorld = myWorld;
         this.world = MyWorld.world;
-
 
         String simpleClassName = this.getClass().getSimpleName();
 
@@ -484,6 +482,14 @@ public abstract class Player extends Sprite implements Disposable{
         changeFixturesShape();
     }
 
+    public Body getPlayer_body() {
+        return player_body;
+    }
+
+    public void setPlayer_body(Body player_body) {
+        this.player_body = player_body;
+    }
+
     public State getCurrentState() {
         return currentState;
     }
@@ -498,6 +504,14 @@ public abstract class Player extends Sprite implements Disposable{
 
     public void setPreviousState(State previousState) {
         this.previousState = previousState;
+    }
+
+    public float getCurrentSpeed() {
+        return currentSpeed;
+    }
+
+    public void setCurrentSpeed(float currentSpeed) {
+        this.currentSpeed = currentSpeed;
     }
 
 }

@@ -28,14 +28,14 @@ public class PlayerContactListener implements ContactListener {
     public void beginContact(Contact contact) {
 
         //check for sides swap
-        if (player1.isPlayer1Side & player1.player_body.getPosition().x > player2.player_body.getPosition().x){
+        if (player1.isPlayer1Side & player1.getPlayer_body().getPosition().x > player2.getPlayer_body().getPosition().x){
             player1.isPlayer1Side = false;
             player2.isPlayer1Side = true;
 
             player1.turnSides();
             player2.turnSides();
         }
-        if (player2.isPlayer1Side & player2.player_body.getPosition().x > player1.player_body.getPosition().x){
+        if (player2.isPlayer1Side & player2.getPlayer_body().getPosition().x > player1.getPlayer_body().getPosition().x){
             player1.isPlayer1Side = true;
             player2.isPlayer1Side = false;
 
@@ -50,23 +50,23 @@ public class PlayerContactListener implements ContactListener {
 
 
         //do something with this!
-        if(player1.player_body.getPosition().x > player2.player_body.getPosition().x - 190/StreetFighter.PPM & player1.player_body.getPosition().x < player2.player_body.getPosition().x + 190/StreetFighter.PPM ){
+        if(player1.getPlayer_body().getPosition().x > player2.getPlayer_body().getPosition().x - 190/StreetFighter.PPM & player1.getPlayer_body().getPosition().x < player2.getPlayer_body().getPosition().x + 190/StreetFighter.PPM ){
 
             if((fixtureA.getUserData() == "high" & fixtureB.getUserData() == "low") || (fixtureB.getUserData() == "high" & fixtureA.getUserData() == "low")){
                 Fixture highFixture = fixtureA.getUserData() == "mid" ? fixtureA : fixtureB;
                 Fixture lowFixture = highFixture == fixtureA ? fixtureB : fixtureA;
 
-                System.out.println(Math.abs(player1.currentSpeed + 0.7));
+                System.out.println(Math.abs(player1.getCurrentSpeed() + 0.7));
                 if(lowFixture.getBody().getUserData() == "player2") {
-                    player2.currentSpeed = ((player2.currentSpeed * -1) - 0.7f) * -1;
+                    player2.setCurrentSpeed(((player2.getCurrentSpeed() * -1) - 0.7f) * -1);
                 } else if(lowFixture.getBody().getUserData() == "player1"){
-                    if(Math.abs(player1.currentSpeed) < Math.abs(player1.currentSpeed + 0.7))
+                    if(Math.abs(player1.getCurrentSpeed()) < Math.abs(player1.getCurrentSpeed() + 0.7))
 
-                    player1.currentSpeed = ((player1.currentSpeed * -1) - 0.7f) * -1;
+                    player1.setCurrentSpeed(((player1.getCurrentSpeed() * -1) - 0.7f) * -1);
                     //Gdx.app.log("Contact", "player1 on player2");
                 }
 
-                float distance = (player2.player_body.getPosition().x - player1.player_body.getPosition().x)/StreetFighter.PPM;
+                float distance = (player2.getPlayer_body().getPosition().x - player1.getPlayer_body().getPosition().x)/StreetFighter.PPM;
                 float maxSpeed = 200f/100f;
 
                 String newLine = "NEW TEST LINE";
