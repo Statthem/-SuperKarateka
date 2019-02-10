@@ -88,11 +88,11 @@ public abstract class Player extends Sprite implements Disposable{
     private float lastPositionY;
     private float lastPositionX;
 
-    public static float maxJumpHeight = 7f;
-    public static float walkingBackSpeed = -5f;
-    public static float walkingForwardSpeed = 6f;
-    public static float jumpingForwardSpeed = 7f;
-    public static float jumpingBackSpeed = -10f;
+    public float maxJumpHeight = 7f;
+    public float walkingBackSpeed = -5f;
+    public float walkingForwardSpeed = 6f;
+    public float jumpingForwardSpeed = 7f;
+    public float jumpingBackSpeed = -10f;
 
     private float currentSpeed;
 
