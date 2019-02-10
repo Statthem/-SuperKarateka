@@ -50,37 +50,39 @@ public class PlayerContactListener implements ContactListener {
 
 
         //do something with this!
-        if(player1.player_body.getPosition().x > player2.player_body.getPosition().x - 185/StreetFighter.PPM & player1.player_body.getPosition().x < player2.player_body.getPosition().x + 185/StreetFighter.PPM ){
-           // Gdx.app.log("Contact", "player1 on player2 collision");
+        if(player1.player_body.getPosition().x > player2.player_body.getPosition().x - 190/StreetFighter.PPM & player1.player_body.getPosition().x < player2.player_body.getPosition().x + 190/StreetFighter.PPM ){
 
-            float distance = player2.player_body.getPosition().x - player1.player_body.getPosition().x;
-            float maxSpeed = 200f/100f;
+            if((fixtureA.getUserData() == "high" & fixtureB.getUserData() == "low") || (fixtureB.getUserData() == "high" & fixtureA.getUserData() == "low")){
+                Fixture highFixture = fixtureA.getUserData() == "mid" ? fixtureA : fixtureB;
+                Fixture lowFixture = highFixture == fixtureA ? fixtureB : fixtureA;
 
-            float speed = maxSpeed - distance;
-            //player1.setCurrentState(Player.State.COLIDING);
-            //playScreen.setPlayerBodySpeedByState(player1);
-            player1.currentSpeed = 0;
+                System.out.println(Math.abs(player1.currentSpeed + 0.7));
+                if(lowFixture.getBody().getUserData() == "player2") {
+                    player2.currentSpeed = ((player2.currentSpeed * -1) - 0.7f) * -1;
+                } else if(lowFixture.getBody().getUserData() == "player1"){
+                    if(Math.abs(player1.currentSpeed) < Math.abs(player1.currentSpeed + 0.7))
 
-            if(player1.isPlayer1Side){
-                player1.player_body.setLinearVelocity(-speed * 100,player1.player_body.getLinearVelocity().y);
-                player2.player_body.setLinearVelocity(10,player2.player_body.getLinearVelocity().y);
-            } else if(player2.isPlayer1Side){
-                player2.player_body.setLinearVelocity(-speed * 100,player1.player_body.getLinearVelocity().y);
-                player1.player_body.setLinearVelocity(10,player2.player_body.getLinearVelocity().y);
+                    player1.currentSpeed = ((player1.currentSpeed * -1) - 0.7f) * -1;
+                    //Gdx.app.log("Contact", "player1 on player2");
+                }
+
+                float distance = (player2.player_body.getPosition().x - player1.player_body.getPosition().x)/StreetFighter.PPM;
+                float maxSpeed = 200f/100f;
+
+                float speed = maxSpeed - distance;
+
+                if(player1.isPlayer1Side){
+                    //   player1.player_body.setLinearVelocity(-speed * 100,player1.player_body.getLinearVelocity().y);
+                    //   player2.player_body.setLinearVelocity(10,player2.player_body.getLinearVelocity().y);
+                } else if(player2.isPlayer1Side){
+                    //    player2.player_body.setLinearVelocity(-speed * 100,player1.player_body.getLinearVelocity().y);
+                    //    player1.player_body.setLinearVelocity(10,player2.player_body.getLinearVelocity().y);
+                }
+
             }
+
         }
 
-        if((fixtureA.getUserData() == "head" & fixtureB.getUserData() == "low") || (fixtureB.getUserData() == "low" & fixtureA.getUserData() == "low")){
-            Fixture head = fixtureA.getUserData() == "head" ? fixtureA : fixtureB;
-            Fixture low = head == fixtureA ? fixtureB : fixtureA;
-
-            if(low.getBody().getUserData() == "player2") {
-              //  Gdx.app.log("Contact", "player2 on player1");
-            } else if(low.getBody().getUserData() == "player1"){
-               // Gdx.app.log("Contact", "player1 on player2");
-              //  player1.player_body.setLinearVelocity(-11, player1.player_body.getLinearVelocity().y);
-            }
-        }
     }
 
     @Override
