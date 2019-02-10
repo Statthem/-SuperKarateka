@@ -72,14 +72,11 @@ public class PlayerContactListener implements ContactListener {
 
                 Gdx.app.log("Contact", player1.getCurrentSpeed() + "");
 
-<<<<<<< HEAD
                 String newLine = "NEW TEST LINE";
-                
-=======
+
                 float distance = (player2.getPlayer_body().getPosition().x - player1.getPlayer_body().getPosition().x)/StreetFighter.PPM;
                 float maxSpeed = 200f/100f;
 
->>>>>>> testbranch
                 float speed = maxSpeed - distance;
 
                 if(player1.isPlayer1Side){
