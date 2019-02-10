@@ -69,6 +69,8 @@ public class PlayerContactListener implements ContactListener {
                 float distance = (player2.player_body.getPosition().x - player1.player_body.getPosition().x)/StreetFighter.PPM;
                 float maxSpeed = 200f/100f;
 
+                String newLine = "NEW TEST LINE";
+
                 float speed = maxSpeed - distance;
 
                 if(player1.isPlayer1Side){
