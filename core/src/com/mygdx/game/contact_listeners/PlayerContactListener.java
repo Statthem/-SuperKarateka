@@ -28,14 +28,14 @@ public class PlayerContactListener implements ContactListener {
     public void beginContact(Contact contact) {
 
         //check for sides swap
-        if (player1.isPlayer1Side & player1.player_body.getPosition().x > player2.player_body.getPosition().x){
+        if (player1.isPlayer1Side & player1.getPlayer_body().getPosition().x > player2.getPlayer_body().getPosition().x){
             player1.isPlayer1Side = false;
             player2.isPlayer1Side = true;
 
             player1.turnSides();
             player2.turnSides();
         }
-        if (player2.isPlayer1Side & player2.player_body.getPosition().x > player1.player_body.getPosition().x){
+        if (player2.isPlayer1Side & player2.getPlayer_body().getPosition().x > player1.getPlayer_body().getPosition().x){
             player1.isPlayer1Side = true;
             player2.isPlayer1Side = false;
 
@@ -43,34 +43,43 @@ public class PlayerContactListener implements ContactListener {
             player2.turnSides();
         }
 
+        //check if players overlap each other on X-Axis
+        if(player1.getPlayer_body().getPosition().x > player2.getPlayer_body().getPosition().x - (player2.getPlayerWidth()/2 + player1.getPlayerWidth()/2)/StreetFighter.PPM
+                & player1.getPlayer_body().getPosition().x < player2.getPlayer_body().getPosition().x + (player2.getPlayerWidth()/2 + player1.getPlayerWidth()/2)/StreetFighter.PPM ) {
 
+
+        }
 
         Fixture fixtureA = contact.getFixtureA();
         Fixture fixtureB = contact.getFixtureB();
 
 
-        //do something with this!
-        if(player1.player_body.getPosition().x > player2.player_body.getPosition().x - 190/StreetFighter.PPM & player1.player_body.getPosition().x < player2.player_body.getPosition().x + 190/StreetFighter.PPM ){
-
             if((fixtureA.getUserData() == "high" & fixtureB.getUserData() == "low") || (fixtureB.getUserData() == "high" & fixtureA.getUserData() == "low")){
                 Fixture highFixture = fixtureA.getUserData() == "mid" ? fixtureA : fixtureB;
                 Fixture lowFixture = highFixture == fixtureA ? fixtureB : fixtureA;
 
-                System.out.println(Math.abs(player1.currentSpeed + 0.7));
                 if(lowFixture.getBody().getUserData() == "player2") {
-                    player2.currentSpeed = ((player2.currentSpeed * -1) - 0.7f) * -1;
+                    if(player2.getCurrentSpeed() > 0)
+                        player2.setCurrentSpeed((player2.getCurrentSpeed() + 0.75f));
+                    if(player2.getCurrentSpeed() < 0)
+                        player2.setCurrentSpeed((player2.getCurrentSpeed() - 0.75f));
                 } else if(lowFixture.getBody().getUserData() == "player1"){
-                    if(Math.abs(player1.currentSpeed) < Math.abs(player1.currentSpeed + 0.7))
-
-                    player1.currentSpeed = ((player1.currentSpeed * -1) - 0.7f) * -1;
-                    //Gdx.app.log("Contact", "player1 on player2");
+                    if(player1.getCurrentSpeed() > 0)
+                    player1.setCurrentSpeed((player1.getCurrentSpeed() + 0.75f));
+                    if(player1.getCurrentSpeed() < 0)
+                        player1.setCurrentSpeed((player1.getCurrentSpeed() - 0.75f));
                 }
 
-                float distance = (player2.player_body.getPosition().x - player1.player_body.getPosition().x)/StreetFighter.PPM;
-                float maxSpeed = 200f/100f;
+                Gdx.app.log("Contact", player1.getCurrentSpeed() + "");
 
+<<<<<<< HEAD
                 String newLine = "NEW TEST LINE";
                 
+=======
+                float distance = (player2.getPlayer_body().getPosition().x - player1.getPlayer_body().getPosition().x)/StreetFighter.PPM;
+                float maxSpeed = 200f/100f;
+
+>>>>>>> testbranch
                 float speed = maxSpeed - distance;
 
                 if(player1.isPlayer1Side){
@@ -85,7 +94,6 @@ public class PlayerContactListener implements ContactListener {
 
         }
 
-    }
 
     @Override
     public void endContact(Contact contact) {

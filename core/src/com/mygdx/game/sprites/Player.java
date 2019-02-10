@@ -22,7 +22,7 @@ import java.util.Map;
 
 
 public abstract class Player extends Sprite implements Disposable{
-    public enum State {STANDING, CROUCHING1, CROUCHING2, CROUCHING3, MOVING_FORWARD, MOVING_BACK, JUMPING, JUMPING_FORWARD, JUMPING_BACK, FALLING, FIGHTING, HITSTUN, COLIDING}
+    public enum State {STANDING, CROUCHING1, CROUCHING2, CROUCHING3, MOVING_FORWARD, MOVING_BACK, JUMPING, JUMPING_BACK, JUMPING_FORWARD, FALLING, FIGHTING, HITSTUN, COLIDING}
     private State currentState;
     private State previousState;
 
@@ -57,7 +57,6 @@ public abstract class Player extends Sprite implements Disposable{
 
     protected float scaledWidht;
 
-    protected Array<Animation> playerAnimations;
     protected Map<String, MyTextureRegion> textureRegionMap;
 
     public TextureAtlas basicAtlas;
@@ -80,10 +79,11 @@ public abstract class Player extends Sprite implements Disposable{
     public boolean crouching;
     public boolean jumping;
 
-    public boolean isPlayer1Side;
+    public  boolean isPlayer1Side;
 
     private com.badlogic.gdx.physics.box2d.World world;
-    public Body player_body;
+
+    private Body player_body;
 
     private float lastPositionY;
     private float lastPositionX;
@@ -94,15 +94,13 @@ public abstract class Player extends Sprite implements Disposable{
     public float jumpingForwardSpeed = 7f;
     public float jumpingBackSpeed = -10f;
 
-    public float currentSpeed;
-
+    private float currentSpeed;
 
     public Player(PlayScreen screen, boolean isPlayer1, MyWorld myWorld){
         super();
         this.screen = screen;
         this.myWorld = myWorld;
         this.world = MyWorld.world;
-
 
         String simpleClassName = this.getClass().getSimpleName();
 
@@ -387,7 +385,7 @@ public abstract class Player extends Sprite implements Disposable{
         }
 
         //if jumping - use last body.position.y
-        if(currentState != State.JUMPING & currentState != State.JUMPING_FORWARD & currentState != State.JUMPING_BACK){
+        if(currentState != State.JUMPING & currentState != State.JUMPING_BACK & currentState != State.JUMPING_FORWARD){
             lastPositionY = player_body.getPosition().y;
             lastPositionX = player_body.getPosition().x;
         }
@@ -396,10 +394,10 @@ public abstract class Player extends Sprite implements Disposable{
             setPosition((player_body.getPosition().x - scaledWidht/ 2), lastPositionY - (standing_lowBox_hy/StreetFighter.PPM));
         }
 
-        if(currentState == State.JUMPING_BACK) {
+        if(currentState == State.JUMPING_FORWARD) {
             setPosition((lastPositionX - getWidth() / 4), lastPositionY - (standing_lowBox_hy / StreetFighter.PPM));
         }
-        if(currentState == State.JUMPING_FORWARD) {
+        if(currentState == State.JUMPING_BACK) {
             setPosition((lastPositionX - getWidth()), lastPositionY - (standing_lowBox_hy / StreetFighter.PPM));
         }
 
@@ -433,10 +431,10 @@ public abstract class Player extends Sprite implements Disposable{
             case JUMPING:
                 region = (TextureRegion) jumpingAnimation.getKeyFrame(stateTimer, false);
                 break;
-            case JUMPING_FORWARD:
+            case JUMPING_BACK:
                 region = (TextureRegion) jumpingLeftAnimation.getKeyFrame(stateTimer, false);
                 break;
-            case JUMPING_BACK:
+            case JUMPING_FORWARD:
                 region = (TextureRegion) jumpingRightAnimation.getKeyFrame(stateTimer, false);
                 break;
 
@@ -484,6 +482,14 @@ public abstract class Player extends Sprite implements Disposable{
         changeFixturesShape();
     }
 
+    public Body getPlayer_body() {
+        return player_body;
+    }
+
+    public void setPlayer_body(Body player_body) {
+        this.player_body = player_body;
+    }
+
     public State getCurrentState() {
         return currentState;
     }
@@ -500,4 +506,19 @@ public abstract class Player extends Sprite implements Disposable{
         this.previousState = previousState;
     }
 
+    public float getCurrentSpeed() {
+        return currentSpeed;
+    }
+
+    public void setCurrentSpeed(float currentSpeed) {
+        this.currentSpeed = currentSpeed;
+    }
+
+    public float getPlayerWidth(){
+        return standing_lowBox_hx * 2;
+    }
+
+    public float getPlayerHeight(){
+        return (standing_lowBox_hy * 2) + (standing_midBox_hy * 2) + (standing_highBox_hy * 2) + (standing_headBox_hy * 2);
+    }
 }
