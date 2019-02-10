@@ -70,6 +70,8 @@ public class PlayerContactListener implements ContactListener {
                 float maxSpeed = 200f/100f;
 
                 String newLine = "NEW TEST LINE";
+                String new3Line = "NEW TEST LINE";
+                String new4Line = "NEW TEST LINE";
 
                 float speed = maxSpeed - distance;
 
