@@ -16,6 +16,8 @@ public class PlayerContactListener implements ContactListener {
     private Player player2;
     private PlayScreen playScreen;
 
+    private boolean overlaped;
+
 
 
     public PlayerContactListener(Player player1, Player player2, PlayScreen playScreen){
@@ -47,6 +49,27 @@ public class PlayerContactListener implements ContactListener {
         if(player1.getPlayer_body().getPosition().x > player2.getPlayer_body().getPosition().x - (player2.getPlayerWidth()/2 + player1.getPlayerWidth()/2)/StreetFighter.PPM
                 & player1.getPlayer_body().getPosition().x < player2.getPlayer_body().getPosition().x + (player2.getPlayerWidth()/2 + player1.getPlayerWidth()/2)/StreetFighter.PPM ) {
 
+            float distance = player1.getPlayer_body().getPosition().x > player2.getPlayer_body().getPosition().x
+                    ? player1.getPlayer_body().getPosition().x - player2.getPlayer_body().getPosition().x
+                    : player2.getPlayer_body().getPosition().x - player1.getPlayer_body().getPosition().x;
+
+            float speed = 14f;
+
+            if((player1.getCurrentState() == Player.State.JUMPING_FORWARD || player1.getCurrentState() == Player.State.JUMPING_BACK)
+                    || (player2.getCurrentState() == Player.State.JUMPING_FORWARD || player2.getCurrentState() == Player.State.JUMPING_BACK)) {
+
+                overlaped = true;
+
+                if(player1.getPlayer_body().getLinearVelocity().y < 0) {
+                    Gdx.app.log("contact", "begin contact " + distance);
+
+                    if (player1.isPlayer1Side)
+                        player2.setCurrentSpeed(speed);
+
+                    if (!player1.isPlayer1Side)
+                        player2.setCurrentSpeed(-speed);
+                }
+            }
 
         }
 
@@ -54,6 +77,7 @@ public class PlayerContactListener implements ContactListener {
         Fixture fixtureB = contact.getFixtureB();
 
 
+        //Speedup player jump when jumping over other player
             if((fixtureA.getUserData() == "high" & fixtureB.getUserData() == "low") || (fixtureB.getUserData() == "high" & fixtureA.getUserData() == "low")){
                 Fixture highFixture = fixtureA.getUserData() == "mid" ? fixtureA : fixtureB;
                 Fixture lowFixture = highFixture == fixtureA ? fixtureB : fixtureA;
@@ -70,22 +94,6 @@ public class PlayerContactListener implements ContactListener {
                         player1.setCurrentSpeed((player1.getCurrentSpeed() - 0.75f));
                 }
 
-                Gdx.app.log("Contact", player1.getCurrentSpeed() + "");
-
-                String newLine = "NEW TEST LINE";
-
-                float distance = (player2.getPlayer_body().getPosition().x - player1.getPlayer_body().getPosition().x)/StreetFighter.PPM;
-                float maxSpeed = 200f/100f;
-
-                float speed = maxSpeed - distance;
-
-                if(player1.isPlayer1Side){
-                    //   player1.player_body.setLinearVelocity(-speed * 100,player1.player_body.getLinearVelocity().y);
-                    //   player2.player_body.setLinearVelocity(10,player2.player_body.getLinearVelocity().y);
-                } else if(player2.isPlayer1Side){
-                    //    player2.player_body.setLinearVelocity(-speed * 100,player1.player_body.getLinearVelocity().y);
-                    //    player1.player_body.setLinearVelocity(10,player2.player_body.getLinearVelocity().y);
-                }
 
             }
 
@@ -94,6 +102,17 @@ public class PlayerContactListener implements ContactListener {
 
     @Override
     public void endContact(Contact contact) {
+
+        if(player1.getPlayer_body().getPosition().x <= player2.getPlayer_body().getPosition().x - (player2.getPlayerWidth()/2 + player1.getPlayerWidth()/2)/StreetFighter.PPM
+                || player1.getPlayer_body().getPosition().x >= player2.getPlayer_body().getPosition().x + (player2.getPlayerWidth()/2 + player1.getPlayerWidth()/2)/StreetFighter.PPM) {
+
+            if(overlaped == true) {
+                overlaped = false;
+                Gdx.app.log("contact", "end contact");
+                if(player2.getCurrentSpeed() != 0) player2.setCurrentSpeed(0);
+
+            }
+        }
 
     }
 

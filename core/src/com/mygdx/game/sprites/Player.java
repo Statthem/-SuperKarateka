@@ -363,6 +363,12 @@ public abstract class Player extends Sprite implements Disposable{
         return animation.isAnimationFinished(stateTimer);
     }
 
+    public boolean onFrame(Animation animation, int frame){
+        float frameDuration = animation.getFrameDuration();
+
+        return stateTimer >= frameDuration * frame & stateTimer <= frameDuration * frame + frameDuration ;
+    }
+
     public void update(float delta){
         TextureRegion region = getFrame(delta);
 
