@@ -109,6 +109,8 @@ public class PlayerContactListener implements ContactListener {
             if(overlaped == true) {
                 overlaped = false;
                 Gdx.app.log("contact", "end contact");
+                Gdx.app.log("contact", "end contact");
+                Gdx.app.log("contact", "end contact");
                 if(player2.getCurrentSpeed() != 0) player2.setCurrentSpeed(0);
 
             }
