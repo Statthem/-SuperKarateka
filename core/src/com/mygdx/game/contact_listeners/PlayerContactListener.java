@@ -16,9 +16,6 @@ public class PlayerContactListener implements ContactListener {
     private Player player2;
     private PlayScreen playScreen;
 
-    private boolean overlaped;
-
-
 
     public PlayerContactListener(Player player1, Player player2, PlayScreen playScreen){
         this.player1 = player1;
@@ -45,33 +42,7 @@ public class PlayerContactListener implements ContactListener {
             player2.turnSides();
         }
 
-        //check if players overlap each other on X-Axis
-        if(player1.getPlayer_body().getPosition().x > player2.getPlayer_body().getPosition().x - (player2.getPlayerWidth()/2 + player1.getPlayerWidth()/2)/StreetFighter.PPM
-                & player1.getPlayer_body().getPosition().x < player2.getPlayer_body().getPosition().x + (player2.getPlayerWidth()/2 + player1.getPlayerWidth()/2)/StreetFighter.PPM ) {
 
-            float distance = player1.getPlayer_body().getPosition().x > player2.getPlayer_body().getPosition().x
-                    ? player1.getPlayer_body().getPosition().x - player2.getPlayer_body().getPosition().x
-                    : player2.getPlayer_body().getPosition().x - player1.getPlayer_body().getPosition().x;
-
-            float speed = 14f;
-
-            if((player1.getCurrentState() == Player.State.JUMPING_FORWARD || player1.getCurrentState() == Player.State.JUMPING_BACK)
-                    || (player2.getCurrentState() == Player.State.JUMPING_FORWARD || player2.getCurrentState() == Player.State.JUMPING_BACK)) {
-
-                overlaped = true;
-
-                if(player1.getPlayer_body().getLinearVelocity().y < 0) {
-                    Gdx.app.log("contact", "begin contact " + distance);
-
-                    if (player1.isPlayer1Side)
-                        player2.setCurrentSpeed(speed);
-
-                    if (!player1.isPlayer1Side)
-                        player2.setCurrentSpeed(-speed);
-                }
-            }
-
-        }
 
         Fixture fixtureA = contact.getFixtureA();
         Fixture fixtureB = contact.getFixtureB();
@@ -102,19 +73,6 @@ public class PlayerContactListener implements ContactListener {
 
     @Override
     public void endContact(Contact contact) {
-
-        if(player1.getPlayer_body().getPosition().x <= player2.getPlayer_body().getPosition().x - (player2.getPlayerWidth()/2 + player1.getPlayerWidth()/2)/StreetFighter.PPM
-                || player1.getPlayer_body().getPosition().x >= player2.getPlayer_body().getPosition().x + (player2.getPlayerWidth()/2 + player1.getPlayerWidth()/2)/StreetFighter.PPM) {
-
-            if(overlaped == true) {
-                overlaped = false;
-                Gdx.app.log("contact", "end contact");
-                Gdx.app.log("contact", "end contact");
-                Gdx.app.log("contact", "end contact");
-                if(player2.getCurrentSpeed() != 0) player2.setCurrentSpeed(0);
-
-            }
-        }
 
     }
 

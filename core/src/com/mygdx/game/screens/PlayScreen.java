@@ -42,6 +42,7 @@ public class PlayScreen implements Screen {
     private double stickCurrentDirection;
 
    private boolean enableAndroidControls;
+   private boolean overlaped;
 
     public AssetManager manager;
 
@@ -71,7 +72,7 @@ public class PlayScreen implements Screen {
         stick = new AnalogStick(game.batch);
     }
 
-    public void handleInput(float dt) {
+    private void handleInput(float dt) {
              handlePlayer1Inputs(dt);
              handlePlayer2Inputs(dt);
     }
@@ -311,7 +312,61 @@ public class PlayScreen implements Screen {
         }
     }
 
+    public void handleStaff() {
 
+        //check if players overlap each other on X-Axis
+        if(player1.getPlayer_body().getPosition().x > player2.getPlayer_body().getPosition().x - (player2.getPlayerWidth()/2 + player1.getPlayerWidth()/2)/StreetFighter.PPM
+                & player1.getPlayer_body().getPosition().x < player2.getPlayer_body().getPosition().x + (player2.getPlayerWidth()/2 + player1.getPlayerWidth()/2)/StreetFighter.PPM ) {
+
+            float distance = player1.getPlayer_body().getPosition().x > player2.getPlayer_body().getPosition().x
+                    ? player1.getPlayer_body().getPosition().x - player2.getPlayer_body().getPosition().x
+                    : player2.getPlayer_body().getPosition().x - player1.getPlayer_body().getPosition().x;
+
+
+            if((player1.getCurrentState() == Player.State.JUMPING_FORWARD || player1.getCurrentState() == Player.State.JUMPING_BACK)
+                    || (player2.getCurrentState() == Player.State.JUMPING_FORWARD || player2.getCurrentState() == Player.State.JUMPING_BACK)) {
+
+                overlaped = true;
+
+                float speed = 18f;
+
+                if(player1.getPlayer_body().getLinearVelocity().y < 0) {
+                    if (player1.isPlayer1Side)
+                        player2.setCurrentSpeed(speed - (distance * 7));
+
+                    if (!player1.isPlayer1Side)
+                        player2.setCurrentSpeed(-speed + (distance * 7));
+                }
+
+//                if(player2.getPlayer_body().getLinearVelocity().y < 0) {
+//                    if (player2.isPlayer1Side)
+//                        player1.setCurrentSpeed(speed - (distance * 7));
+//
+//                    if (!player2.isPlayer1Side)
+//                        player1.setCurrentSpeed(-speed + (distance * 7));
+//                }
+            }
+
+        }
+
+
+        if(player1.getPlayer_body().getPosition().x <= player2.getPlayer_body().getPosition().x - (player2.getPlayerWidth()/2 + player1.getPlayerWidth()/2)/StreetFighter.PPM
+                || player1.getPlayer_body().getPosition().x >= player2.getPlayer_body().getPosition().x + (player2.getPlayerWidth()/2 + player1.getPlayerWidth()/2)/StreetFighter.PPM) {
+
+            if(overlaped == true) {
+                overlaped = false;
+
+                if(player1.getPlayer_body().getLinearVelocity().y < 0)
+                    if (player2.getCurrentSpeed() != 0) player2.setCurrentSpeed(0);
+
+                if(player2.getPlayer_body().getLinearVelocity().y < 0)
+                    if (player1.getCurrentSpeed() != 0) player1.setCurrentSpeed(0);
+
+            }
+        }
+
+
+    }
     /*
      * shows frame-rate deviation
      * 1 - fps == 60, > 1 - fps is lower than 60, < 1 fps is higher than 60
@@ -326,6 +381,8 @@ public class PlayScreen implements Screen {
 
     public void update(float dt){
      handleInput(dt);
+
+     handleStaff();
 
      world.step(1/60f,6,2);
 
