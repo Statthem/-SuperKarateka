@@ -20,7 +20,7 @@ import com.mygdx.game.screens.PlayScreen;
 import java.util.HashMap;
 import java.util.Map;
 
-
+// this is going to change... soon... very soon
 public abstract class Player extends Sprite implements Disposable{
     public enum State {STANDING, CROUCHING1, CROUCHING2, CROUCHING3, MOVING_FORWARD, MOVING_BACK, JUMPING, JUMPING_BACK, JUMPING_FORWARD, FALLING, FIGHTING, HITSTUN, COLIDING}
     private State currentState;
